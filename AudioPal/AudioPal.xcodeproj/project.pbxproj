@@ -15,6 +15,8 @@
 		5175FCD91ECEA1B300A28166 /* PalsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */; };
 		5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDA1ECEA3D900A28166 /* Constants.swift */; };
 		5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */; };
+		519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D696E1ED3EC6B00271B2C /* CallManager.swift */; };
+		519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D69701ED3EFEC00271B2C /* NearbyPal.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,8 @@
 		5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PalsTableViewController.swift; sourceTree = "<group>"; };
 		5175FCDA1ECEA3D900A28166 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetNameViewController.swift; sourceTree = "<group>"; };
+		519D696E1ED3EC6B00271B2C /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
+		519D69701ED3EFEC00271B2C /* NearbyPal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyPal.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +93,8 @@
 				5175FCDA1ECEA3D900A28166 /* Constants.swift */,
 				5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */,
 				5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */,
+				519D696E1ED3EC6B00271B2C /* CallManager.swift */,
+				519D69701ED3EFEC00271B2C /* NearbyPal.swift */,
 			);
 			path = AudioPal;
 			sourceTree = "<group>";
@@ -211,6 +217,8 @@
 				5175FCD91ECEA1B300A28166 /* PalsTableViewController.swift in Sources */,
 				5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */,
 				5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */,
+				519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */,
+				519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +430,7 @@
 				5175FCD41ECE9F1200A28166 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5175FCD51ECE9F1200A28166 /* Build configuration list for PBXNativeTarget "AudioPalTests" */ = {
 			isa = XCConfigurationList;
@@ -430,6 +439,7 @@
 				5175FCD71ECE9F1200A28166 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

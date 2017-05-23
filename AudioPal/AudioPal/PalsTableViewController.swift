@@ -8,11 +8,27 @@
 
 import UIKit
 
-class PalsTableViewController: UITableViewController {
+class PalsTableViewController: UITableViewController, CallManagerDelegate {
+    var callManager: CallManager
     
     private lazy var userName: String? = {
         return UserDefaults.standard.value(forKey: StoredValues.username) as? String
     }()
+    
+    override init(style: UITableViewStyle) {
+        callManager = CallManager()
+        super.init(style: style)
+    }
+    
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        callManager = CallManager()
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        callManager = CallManager()
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +44,8 @@ class PalsTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         if (userName == nil) {
             self.parent!.performSegue(withIdentifier: StoryboardSegues.setName, sender: self)
+        } else {
+            startCallManager()
         }
     }
 
@@ -35,6 +53,12 @@ class PalsTableViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func startCallManager() {
+        callManager.delegate = self
+    }
+    
+    
 
     // MARK: - Table view data source
 
@@ -48,7 +72,7 @@ class PalsTableViewController: UITableViewController {
         return 0
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
 
@@ -56,7 +80,7 @@ class PalsTableViewController: UITableViewController {
 
         return cell
     }
-    */
+ 
 
     /*
     // Override to support conditional editing of the table view.
@@ -66,7 +90,7 @@ class PalsTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
@@ -76,7 +100,7 @@ class PalsTableViewController: UITableViewController {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
     }
-    */
+ 
 
     /*
     // Override to support rearranging the table view.
@@ -109,11 +133,29 @@ class PalsTableViewController: UITableViewController {
                                                object: nil,
                                                queue: nil) { (notification) in
                                                     self.userName = (notification.userInfo![StoredValues.username] as! String)
+                                                    self.startCallManager()
                                                 }
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    // MARK: - CallManagerDelegate
+    func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
+        
+    }
+    
+    func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal) {
+        
+    }
+    
+    func callManager(_ callManager: CallManager, didDetectCallError error:Error, withPal pal: NearbyPal) {
+        
+    }
+    
+    func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeStatus status: PalStatus) {
+        
     }
 
 }
