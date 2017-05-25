@@ -8,8 +8,8 @@
 
 import UIKit
 
-enum PalStatus {
-    case NoAvailable
+enum PalStatus: Int {
+    case NoAvailable = 0
     case Available
     case Occupied
     case Blocked

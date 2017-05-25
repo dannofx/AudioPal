@@ -56,6 +56,7 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     
     func startCallManager() {
         callManager.delegate = self
+        callManager.start()
     }
     
     
@@ -137,10 +138,6 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
                                                 }
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
     // MARK: - CallManagerDelegate
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
         
@@ -156,6 +153,10 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeStatus status: PalStatus) {
         
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
 }

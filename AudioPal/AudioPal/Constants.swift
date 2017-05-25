@@ -17,3 +17,9 @@ struct StoredValues {
 struct NotificationNames {
     static let userReady = "userReady"
 }
+
+struct PacketKeys {
+    static let username = "username"
+    static let uuid = "uuid"
+    static let pal_status = "pal_+status"
+}
