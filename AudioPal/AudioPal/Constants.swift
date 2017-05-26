@@ -19,7 +19,7 @@ struct NotificationNames {
 }
 
 struct PacketKeys {
-    static let username = "username"
-    static let uuid = "uuid"
-    static let pal_status = "pal_+status"
+    static let username = "un"
+    static let uuid = "uid"
+    static let pal_status = "p_st"
 }

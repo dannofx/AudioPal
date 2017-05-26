@@ -21,15 +21,14 @@ protocol CallManagerDelegate: class {
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate {
     //TODO: Add persistence
-    let localIdentifier = UUID().uuidString
-    var localService: NetService
-    var serviceBrowser: NetServiceBrowser
+    let localIdentifier = UUID()
+    var localService: NetService!
+    var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     weak var delegate: CallManagerDelegate?
 
     override init() {
-        serviceBrowser = NetServiceBrowser()
-        localService = NetService()
+
     }
     
     // MARK: - Service initialization
@@ -41,7 +40,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
                                 port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
-        localService.startMonitoring()
+        //localService.startMonitoring()
         localService.publish(options: .listenForConnections)
     }
     
@@ -63,40 +62,92 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     func createTXTRecord() -> Data {
+        // Get username data
         let username = UserDefaults.standard.value(forKey: StoredValues.username) as! String
-        let statusValue = localStatus.rawValue
-        let packet: [String : Any] = [ PacketKeys.username: username,
-                       PacketKeys.uuid: localIdentifier,
-                       PacketKeys.pal_status: statusValue ]
+        let username_data = username.data(using: .utf8)!
         
-        let data = NSKeyedArchiver.archivedData(withRootObject: packet)
-        let d = "A".data(using: .utf8)
-        let txt = NetService.data(fromTXTRecord: ["l": d!])
+        //Get uuid data
+        var uuid_bytes = localIdentifier.uuid
+        let uuid_data = withUnsafePointer(to: &uuid_bytes) { (unsafe_uuid) -> Data in
+            Data(bytes: unsafe_uuid, count: MemoryLayout<uuid_t>.size)
+        }
+        
+        // Get status data
+        var statusValue = localStatus.rawValue
+        let status_data = withUnsafePointer(to: &statusValue) { (unsafe_status) -> Data in
+            Data(bytes: unsafe_status, count: MemoryLayout.size(ofValue: unsafe_status))
+        }
+        
+        // Make a dictionary compatible with txt records format
+        let packet: [String : Data] = [ PacketKeys.username: username_data,
+                                        PacketKeys.uuid: uuid_data,
+                                        PacketKeys.pal_status: status_data]
+        
+        // Create the record
+        let txt = NetService.data(fromTXTRecord: packet)
+        print("I SEND \(String(describing: username)) uuid \(localIdentifier.uuidString) (\(uuid_data.count)) status \(localStatus)")
         print("len \(txt.count)")
         return txt
     }
     
     func decodeTXTRecord(_ record: Data) -> [String: Any]? {
-        let d = NetService.dictionary(fromTXTRecord: record)
-        if d.count == 0 {
-            return nil
-        }
-        guard let packet = NSKeyedUnarchiver.unarchiveObject(with: d["l"]!) else {
+        let dict = NetService.dictionary(fromTXTRecord: record)
+        if dict.count == 0 {
             //TODO: Manage this case
             return nil
         }
-        return packet as? [String : Any]
+        guard let username_data = dict[PacketKeys.username] else {
+            return nil
+        }
+        guard let uuid_data = dict[PacketKeys.uuid] else {
+            return nil
+        }
+        guard let status_data = dict[PacketKeys.pal_status] else {
+            return nil
+        }
+        
+        print("Recibo!!! \(record.count)")
+
+        let username =  String(data: username_data, encoding: String.Encoding.utf8) as String!
+        
+        var uuid_bytes: uuid_t = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+        print("Data?!!! \(uuid_data.count)")
+        let uuid_p1: UnsafePointer<Data> = uuid_data.withUnsafeBytes { $0 }
+        let uuid_p2: UnsafeMutablePointer<uuid_t> = withUnsafeMutablePointer(to: &uuid_bytes) { $0 }
+        memcpy(uuid_p2, uuid_p1, MemoryLayout<uuid_t>.size)
+        
+        
+        let uuid = UUID(uuid: uuid_bytes)
+        
+        let status_raw: Int = status_data.withUnsafeBytes { $0.pointee }
+        let status = PalStatus(rawValue: status_raw)!
+        
+        print("I GOT username \(String(describing: username)) uuid \(uuid.uuidString) status \(status)")
+        
+        
+        //uuid_data.get
+        //let uuid = UUID(uuid: withU)
+//        guard let packet = NSKeyedUnarchiver.unarchiveObject(with: record) else {
+//
+//            return nil
+//        }
+//        print("Some txt data retrieved \(packet)")
+        
+//        return packet as? [String : Any]
+        return nil
         
     }
     
     // MARK: NetServiceDelegate
     
     public func netServiceDidPublish(_ sender: NetService) {
-        localStatus = .Available
-        let txtData = createTXTRecord()
-        localService.setTXTRecord(txtData)
-        
-        setupBrowser()
+        if sender == localService {
+            localStatus = .Available
+            let txtData = createTXTRecord()
+            localService.setTXTRecord(txtData)
+            
+            setupBrowser()
+        }
     }
     
     
@@ -112,6 +163,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netServiceDidResolveAddress(_ sender: NetService) {
+        print("RESUELTO!!")
         if sender.txtRecordData() != nil {
             let dic = decodeTXTRecord(sender.txtRecordData()!)
             if dic == nil {
@@ -136,10 +188,12 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     public func netService(_ sender: NetService, didUpdateTXTRecord data: Data) {
         
-        guard let palInfo = decodeTXTRecord(data) else {
-            return
-        }
-        print("Pal info \(palInfo)")
+        print("INFO UPDATED")
+        _ = decodeTXTRecord(data)
+//        guard let palInfo = decodeTXTRecord(data) else {
+//            return
+//        }
+//        print("Pal info \(palInfo)")
         
     }
     
@@ -172,10 +226,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         
         if service != localService {
-            print("Service found!!!!!")
+            print("Another service found")
             service.delegate = self
             service.resolve(withTimeout: 5.0)
-            service.startMonitoring()
+            service.perform(#selector(service.startMonitoring), with: nil, afterDelay: 3.0)
+            //service.startMonitoring()
         }
        // let txtData = createTXTRecord()
        // localService.setTXTRecord(txtData)
