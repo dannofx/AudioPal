@@ -26,6 +26,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     weak var delegate: CallManagerDelegate?
+    
+    var nearbyPals: [NearbyPal] = []
 
     override init() {
 
@@ -40,7 +42,6 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
                                 port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
-        //localService.startMonitoring()
         localService.publish(options: .listenForConnections)
     }
     
@@ -60,6 +61,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     public func stop() {
 
     }
+    
+    // MARK - TXT record utils
     
     func createTXTRecord() -> Data {
         // Get username data
@@ -85,15 +88,12 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         
         // Create the record
         let txt = NetService.data(fromTXTRecord: packet)
-        print("I SEND \(String(describing: username)) uuid \(localIdentifier.uuidString) (\(uuid_data.count)) status \(localStatus)")
-        print("len \(txt.count)")
         return txt
     }
     
-    func decodeTXTRecord(_ record: Data) -> [String: Any]? {
+    func decodeTXTRecord(_ record: Data) -> (username: String, uuid: UUID, status: PalStatus)?{
         let dict = NetService.dictionary(fromTXTRecord: record)
         if dict.count == 0 {
-            //TODO: Manage this case
             return nil
         }
         guard let username_data = dict[PacketKeys.username] else {
@@ -106,39 +106,92 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             return nil
         }
         
-        print("Recibo!!! \(record.count)")
-
-        let username =  String(data: username_data, encoding: String.Encoding.utf8) as String!
+        // Decode username
+        let username =  String(data: username_data, encoding: String.Encoding.utf8)!
         
+        // Decode uuid
         var uuid_bytes: uuid_t = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-        print("Data?!!! \(uuid_data.count)")
         let uuid_p1: UnsafePointer<Data> = uuid_data.withUnsafeBytes { $0 }
         let uuid_p2: UnsafeMutablePointer<uuid_t> = withUnsafeMutablePointer(to: &uuid_bytes) { $0 }
         memcpy(uuid_p2, uuid_p1, MemoryLayout<uuid_t>.size)
-        
-        
         let uuid = UUID(uuid: uuid_bytes)
         
+        //Decode status
         let status_raw: Int = status_data.withUnsafeBytes { $0.pointee }
         let status = PalStatus(rawValue: status_raw)!
         
-        print("I GOT username \(String(describing: username)) uuid \(uuid.uuidString) status \(status)")
+        print("Pal updated TXT record: username \(String(describing: username)) uuid \(uuid.uuidString) status \(status)")
         
-        
-        //uuid_data.get
-        //let uuid = UUID(uuid: withU)
-//        guard let packet = NSKeyedUnarchiver.unarchiveObject(with: record) else {
-//
-//            return nil
-//        }
-//        print("Some txt data retrieved \(packet)")
-        
-//        return packet as? [String : Any]
-        return nil
+        return (username, uuid, status)
         
     }
     
-    // MARK: NetServiceDelegate
+    func processTxtUpdate(forService service: NetService, withData data: Data?) {
+        if data != nil {
+            let tuple = decodeTXTRecord(data!)
+            if tuple == nil {
+                return
+            }
+            let pal = getPalWithService(service)
+            if pal != nil {
+                updatePal(pal!, withData: tuple!)
+            }
+        } else {
+            print("Peer not fully resolved")
+        }
+    }
+    
+    // MARK: - Nearby pal utils
+    
+    func getPalWithService(_ service: NetService) -> NearbyPal? {
+        return nearbyPals.filter{ $0.service == service }.first
+    }
+    
+    func getPalWithUUID(_ uuid: UUID) -> NearbyPal? {
+        return nearbyPals.filter{ $0.uuid == uuid }.first
+    }
+    
+    func addPal(withService service: NetService) -> NearbyPal {
+        let existingPal = getPalWithService(service)
+        
+        if existingPal != nil {
+            return existingPal!
+        } else {
+            return NearbyPal(service)
+        }
+    }
+    
+    func removePal(_ pal: NearbyPal) {
+        guard let index = nearbyPals.index(of: pal) else {
+            return
+        }
+        //TODO: Add events like close connections if opened
+        nearbyPals.remove(at: index)
+        delegate?.callManager(self, didDetectDisconnection: pal)
+    }
+    
+    func updatePal(_ pal: NearbyPal, withData data:(username: String, uuid: UUID, status: PalStatus)) {
+        let oldStatus = pal.status
+        pal.username = data.username
+        pal.uuid = data.uuid
+        pal.status = data.status
+        
+        if oldStatus != pal.status {
+            if pal.status == .Available {
+                delegate?.callManager(self, didDetectNearbyPal: pal)
+            } else if pal.status == .NoAvailable {
+                // I keep the pal, but it isn't available for the client until
+                // it's available again.
+                delegate?.callManager(self, didDetectDisconnection: pal)
+            } else {
+                delegate?.callManager(self, didPal: pal, changeStatus: pal.status)
+            }
+        }
+        
+    }
+    
+    
+    // MARK: - NetServiceDelegate
     
     public func netServiceDidPublish(_ sender: NetService) {
         if sender == localService {
@@ -163,16 +216,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netServiceDidResolveAddress(_ sender: NetService) {
-        print("RESUELTO!!")
-        if sender.txtRecordData() != nil {
-            let dic = decodeTXTRecord(sender.txtRecordData()!)
-            if dic == nil {
-                return
-            }
-            print("RESOLVED \(String(describing: dic))")
-        } else {
-            print("Not fully resolved")
+        if sender == localService {
+            return
         }
+        processTxtUpdate(forService: sender, withData: sender.txtRecordData())
     }
     
     
@@ -187,14 +234,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netService(_ sender: NetService, didUpdateTXTRecord data: Data) {
-        
-        print("INFO UPDATED")
-        _ = decodeTXTRecord(data)
-//        guard let palInfo = decodeTXTRecord(data) else {
-//            return
-//        }
-//        print("Pal info \(palInfo)")
-        
+        if sender == localService {
+            return
+        }
+        processTxtUpdate(forService: sender, withData: data)
     }
     
     public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
@@ -212,11 +255,12 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser) {
+        //TODO: Manage this event (show to the user)
         
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String : NSNumber]) {
-        
+        //TODO: Manage this event (show to the user)
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFindDomain domainString: String, moreComing: Bool) {
@@ -225,36 +269,17 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         
-        if service != localService {
-            print("Another service found")
+        if service != localService && getPalWithService(service) != nil{
             service.delegate = self
             service.resolve(withTimeout: 5.0)
-            service.perform(#selector(service.startMonitoring), with: nil, afterDelay: 3.0)
-            //service.startMonitoring()
+
+            let currentQueue = OperationQueue.current?.underlyingQueue
+            let time = DispatchTime.now() + DispatchTimeInterval.milliseconds(300)
+            currentQueue?.asyncAfter(deadline: time) {
+                service.startMonitoring()
+            }
+            _ = addPal(withService: service)
         }
-       // let txtData = createTXTRecord()
-       // localService.setTXTRecord(txtData)
-        
-//        if localService?.name == service.name || (service.name.range(of: baseServiceName) == nil) {
-//            return
-//        }
-//        
-//        let localValue = localService!.name.crc32()
-//        let remoteValue = service.name.crc32()
-//        
-//        if localValue > remoteValue {
-//            print("Connection starts")
-//            let success = service.getInputStream(&inputStream, outputStream: &outputStream)
-//            if (success) {
-//                sender = true
-//                openStreams()
-//                print("Connection established")
-//            } else {
-//                print("Connection aborted")
-//            }
-//        } else {
-//            print("Waiting for connection")
-//        }
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didRemoveDomain domainString: String, moreComing: Bool) {
@@ -262,6 +287,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool){
+        let pal = getPalWithService(service)
+        if pal != nil {
+            self.removePal(pal!)
+        }
         
     }
 

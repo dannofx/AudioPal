@@ -16,12 +16,13 @@ enum PalStatus: Int {
 }
 
 class NearbyPal: NSObject {
-    let identifier: String
-    var name: String?
+    var uuid: UUID?
+    var username: String?
     var status: PalStatus
+    let service: NetService!
     
-    init(_ identifier: String) {
-        self.identifier = identifier
+    init(_ service: NetService) {
+        self.service = service
         self.status = .NoAvailable
     }
 
