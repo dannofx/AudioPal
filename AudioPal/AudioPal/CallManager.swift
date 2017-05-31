@@ -10,22 +10,34 @@ import UIKit
 
 let domain = "local"
 let serviceType = "_apal._tcp."
-let serviceName = "audiopal"
+let baseServiceName = "audiopal"
 
 protocol CallManagerDelegate: class {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectCallError error: Error, withPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeStatus status: PalStatus)
+    func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeUsername username: String)
 }
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate {
-    //TODO: Add persistence
-    let localIdentifier = UUID()
     var localService: NetService!
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     weak var delegate: CallManagerDelegate?
+    
+    private lazy var localIdentifier: UUID = {
+        var uuidString = UserDefaults.standard.value(forKey: StoredValues.uuid) as? String
+        var uuid: UUID!
+        if (uuidString == nil) {
+            uuid = UUID()
+            UserDefaults.standard.set(uuid.uuidString, forKey: StoredValues.uuid)
+        } else {
+            uuid = NSUUID.init(uuidString: uuidString!)! as UUID
+        }
+        
+        return uuid
+    }()
     
     var nearbyPals: [NearbyPal] = []
 
@@ -36,9 +48,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     // MARK: - Service initialization
     
     func setupService() {
+        let customServiceName = "\(baseServiceName)|\(localIdentifier)"
         localService = NetService(domain: "\(domain).",
                                 type: serviceType,
-                                name: serviceName,
+                                name: customServiceName,
                                 port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
@@ -55,6 +68,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
 
     public func start() {
         setupService()
+//        Hay que probar las conexiones y desconexiones
+//        Hay que ver que pasa después de varias corridas.
+//        Hay que abrir los streams de datos
+//        Con eso hay que empezar a manejar el estado local y el del peer con el que se habla
+//        Hay que manejar los errores de streams como desconexiones.
 
     }
 
@@ -132,8 +150,18 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             if tuple == nil {
                 return
             }
+            
+            if tuple!.uuid != service.uuid ||
+                tuple!.uuid != localIdentifier {
+                //If the uuid doesn't coincide or
+                // it's the same than the local identifier
+                // the information is not reliable
+                return
+            }
+            
             let pal = getPalWithService(service)
             if pal != nil {
+                
                 updatePal(pal!, withData: tuple!)
             }
         } else {
@@ -148,7 +176,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     func getPalWithUUID(_ uuid: UUID) -> NearbyPal? {
-        return nearbyPals.filter{ $0.uuid == uuid }.first
+        return nearbyPals.filter{ $0.uuid == uuid || $0.service.uuid == uuid }.first
     }
     
     func addPal(withService service: NetService) -> NearbyPal {
@@ -157,7 +185,9 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         if existingPal != nil {
             return existingPal!
         } else {
-            return NearbyPal(service)
+            let pal = NearbyPal(service)
+            nearbyPals.append(pal)
+            return pal
         }
     }
     
@@ -172,6 +202,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     func updatePal(_ pal: NearbyPal, withData data:(username: String, uuid: UUID, status: PalStatus)) {
         let oldStatus = pal.status
+        let oldName = pal.username
         pal.username = data.username
         pal.uuid = data.uuid
         pal.status = data.status
@@ -186,6 +217,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             } else {
                 delegate?.callManager(self, didPal: pal, changeStatus: pal.status)
             }
+        }
+        
+        if oldName != nil && oldName != pal.username{
+            delegate?.callManager(self, didPal: pal, changeUsername: pal.username!)
         }
         
     }
@@ -211,7 +246,6 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netServiceWillResolve(_ sender: NetService) {
-        print("Will resolve")
     }
     
     
@@ -229,7 +263,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netServiceDidStop(_ sender: NetService) {
-        print("Service stopped")
+
     }
     
     
@@ -268,16 +302,35 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
+        print("Name \(service.name)")
+        let validService = service != localService &&
+            service.baseName != "" &&
+            service.baseName == baseServiceName
         
-        if service != localService && getPalWithService(service) != nil{
+        if !validService {
+            return
+        }
+        
+        if getPalWithService(service) == nil{
+            
+            let existingPal = getPalWithUUID(service.uuid!)
+            if existingPal != nil {
+                // Just the newer version of the service will remain
+                if existingPal!.service.version < service.version {
+                    removePal(existingPal!)
+                } else {
+                    return
+                }
+            }
             service.delegate = self
             service.resolve(withTimeout: 5.0)
-
             let currentQueue = OperationQueue.current?.underlyingQueue
             let time = DispatchTime.now() + DispatchTimeInterval.milliseconds(300)
             currentQueue?.asyncAfter(deadline: time) {
                 service.startMonitoring()
             }
+            print("Another service found")
+            
             _ = addPal(withService: service)
         }
     }

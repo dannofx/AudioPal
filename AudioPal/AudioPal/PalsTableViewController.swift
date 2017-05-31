@@ -10,6 +10,7 @@ import UIKit
 
 class PalsTableViewController: UITableViewController, CallManagerDelegate {
     var callManager: CallManager
+    var connectedPals: [NearbyPal]
     
     private lazy var userName: String? = {
         return UserDefaults.standard.value(forKey: StoredValues.username) as? String
@@ -17,16 +18,19 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     
     override init(style: UITableViewStyle) {
         callManager = CallManager()
+        connectedPals = []
         super.init(style: style)
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         callManager = CallManager()
+        connectedPals = []
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
     
     required init?(coder aDecoder: NSCoder) {
         callManager = CallManager()
+        connectedPals = []
         super.init(coder: aDecoder)
     }
 
@@ -64,21 +68,18 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+        return connectedPals.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
+        let cell = tableView.dequeueReusableCell(withIdentifier: "palCell", for: indexPath) as! PalTableViewCell
+        let pal = connectedPals[indexPath.row]
+        cell.configure(withPal: pal)
         return cell
     }
  
@@ -140,11 +141,24 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     
     // MARK: - CallManagerDelegate
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
-        
+        print("Inserting")
+        tableView.beginUpdates()
+        let indexPath = IndexPath.init(row: connectedPals.count, section: 0)
+        connectedPals.append(pal)
+        tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        tableView.endUpdates()
     }
     
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal) {
-        
+        guard let index = connectedPals.index(of: pal) else {
+            return
+        }
+        print("Deleting")
+        tableView.beginUpdates()
+        let indexPath = IndexPath.init(row: index, section: 0)
+        connectedPals.remove(at: index)
+        tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        tableView.endUpdates()
     }
     
     func callManager(_ callManager: CallManager, didDetectCallError error:Error, withPal pal: NearbyPal) {
@@ -152,7 +166,22 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     }
     
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeStatus status: PalStatus) {
-        
+        updateCell(forPal: pal)
+    }
+    
+    func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeUsername username: String) {
+        updateCell(forPal: pal)
+    }
+    
+    func updateCell(forPal pal: NearbyPal) {
+        guard let index = connectedPals.index(of: pal) else {
+            return
+        }
+        print("Updating")
+        tableView.beginUpdates()
+        let indexPath = IndexPath.init(row: index, section: 0)
+        tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        tableView.endUpdates()
     }
     
     deinit {

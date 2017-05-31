@@ -12,6 +12,7 @@ struct StoryboardSegues {
 
 struct StoredValues {
     static let username = "username"
+    static let uuid = "uuid"
 }
 
 struct NotificationNames {
