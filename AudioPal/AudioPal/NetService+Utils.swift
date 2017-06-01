@@ -20,6 +20,12 @@ extension NetService {
         }
     }
     
+    public convenience init(domain: String, type: String, baseName: String, uuid: UUID, port: Int32)
+    {
+        let customServiceName = "\(uuid.uuidString)|\(baseName)"
+        self.init(domain: "\(domain).", type: serviceType, name: customServiceName, port: 0)
+    }
+    
     var uuid: UUID? {
         get {
             let tuple = parseNameData()
@@ -45,10 +51,10 @@ extension NetService {
         if elements.count < 2 {
             return nil
         }
-        let base = elements[0]
-        elements = elements[1].components(separatedBy: " (")
         let uuidString = elements[0]
         let uuid = NSUUID(uuidString: uuidString)! as UUID
+        elements = elements[1].components(separatedBy: " (")
+        let base = elements[0]
         var version = 0
         if elements.count == 2 {
             var versionString = elements[1]

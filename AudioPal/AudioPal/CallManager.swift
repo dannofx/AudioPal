@@ -20,11 +20,26 @@ protocol CallManagerDelegate: class {
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeUsername username: String)
 }
 
+struct Call {
+    let pal: NearbyPal
+    let inputStream: InputStream
+    let outputStream: OutputStream
+    
+    init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream) {
+        self.pal = pal
+        self.inputStream = inputStream
+        self.outputStream = outputStream
+    }
+}
+
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate {
     var localService: NetService!
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
+    var currentCall: Call?
     weak var delegate: CallManagerDelegate?
+    var adProcessor: ADProcessor?
+    var inputBuffer: Data?
     
     private lazy var localIdentifier: UUID = {
         var uuidString = UserDefaults.standard.value(forKey: StoredValues.uuid) as? String
@@ -48,11 +63,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     // MARK: - Service initialization
     
     func setupService() {
-        let customServiceName = "\(baseServiceName)|\(localIdentifier)"
-        localService = NetService(domain: "\(domain).",
-                                type: serviceType,
-                                name: customServiceName,
-                                port: 0)
+        localService = NetService(domain: domain,
+                                    type: serviceType,
+                                baseName: baseServiceName,
+                                    uuid: localIdentifier,
+                                    port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
         localService.publish(options: .listenForConnections)
@@ -68,16 +83,124 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
 
     public func start() {
         setupService()
-//        Hay que probar las conexiones y desconexiones
-//        Hay que ver que pasa después de varias corridas.
-//        Hay que abrir los streams de datos
-//        Con eso hay que empezar a manejar el estado local y el del peer con el que se habla
+
+//        Meter todo dentro de call (ADProcessor e input buffer)
+//        Instanciar el procesador de audio cuando es debido
+//        Probar los metodos de desconexion e implementar rechazar llamada
 //        Hay que manejar los errores de streams como desconexiones.
 
     }
 
     public func stop() {
 
+    }
+    
+    // MARK: - Call amangement
+    
+    public func call(toPal pal: NearbyPal) -> Bool {
+        if localStatus != .Available {
+            return false
+        }
+        var inputStream: InputStream?
+        var outputStream: OutputStream?
+        let success = pal.service.getInputStream(&inputStream, outputStream: &outputStream)
+        if !success {
+            return false
+        }
+        // Open Streams
+        currentCall = Call(pal: pal, inputStream: inputStream!, outputStream: outputStream!)
+        openStreams(forCall: currentCall!)
+        // Update information for nearby pals
+        localStatus = .Occupied
+        propagateLocalTxtRecord()
+        
+    }
+    
+    public func acceptCall(_ call: Call) -> Bool{
+        if localStatus != .Available {
+            return false
+        }
+        // Open Streams
+        currentCall = Call(pal: call.pal, inputStream: call.inputStream, outputStream: call.outputStream)
+        openStreams(forCall: currentCall!)
+        // Update information for nearby pals
+        localStatus = .Occupied
+        propagateLocalTxtRecord()
+        
+    }
+    
+    public func rejectCall(_ call: Call) {
+        // TODO: Pending implementation
+    }
+    
+    public func endCall(_ call: Call) {
+        closeStreams(forCall: call)
+        localStatus = .Available
+        propagateLocalTxtRecord()
+    }
+    
+    // MARK: - Streams management
+    
+    private func openStreams(forCall call: Call) {
+        call.outputStream.delegate = self
+        call.outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        call.outputStream.open()
+        
+        call.inputStream.delegate = self
+        call.inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        call.inputStream.open()
+    }
+    
+    private func closeStreams(forCall call: Call) {
+        call.outputStream.delegate = nil
+        call.outputStream.close()
+        
+        call.inputStream.delegate = nil
+        call.inputStream.close()
+        
+        call.pal.service.stop() // This really do something??
+    }
+    
+    // MARK: - Audio management
+    func startAudioProcessor() {
+        
+    }
+    
+    func stopAudioProcessor() {
+        
+    }
+    
+    func extractCompleteBuffers() -> [Data] {
+        
+        var completeBuffers = [Data]()
+        while inputBuffer!.count > 0 {
+            let globalBuffer = inputBuffer! as NSData
+            // Check if at least has data for the first index and the first byte
+            if (globalBuffer.length < 3) {
+                // print("Not enough received data (not even the index)")
+                return completeBuffers
+            }
+            //Index where the real data should start
+            let dataIndex =  MemoryLayout<UInt16>.size
+            // get the buffer size
+            var bufferSize_Int16: UInt16 = 0
+            globalBuffer.getBytes(&bufferSize_Int16, range: NSMakeRange(0, dataIndex))
+            let bufferSize: Int = Int(bufferSize_Int16)
+            // Check if the real data buffer can fit in the remaining data
+            let remainingSize = globalBuffer.length - bufferSize
+            if (remainingSize < bufferSize) {
+                return completeBuffers
+            }
+            // Get the actual data buffer
+            let currentBuffer = globalBuffer.subdata(with: NSMakeRange(dataIndex, bufferSize))
+            completeBuffers.append(currentBuffer)
+            // Clean from the global buffer
+            let totalSizeForBuffer = (dataIndex + bufferSize)
+            inputBuffer?.removeSubrange(0..<totalSizeForBuffer)
+        }
+        
+        return completeBuffers
+        
     }
     
     // MARK - TXT record utils
@@ -144,6 +267,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         
     }
     
+    func propagateLocalTxtRecord() {
+        let txtData = createTXTRecord()
+        localService.setTXTRecord(txtData)
+    }
+    
     func processTxtUpdate(forService service: NetService, withData data: Data?) {
         if data != nil {
             let tuple = decodeTXTRecord(data!)
@@ -152,7 +280,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             }
             
             if tuple!.uuid != service.uuid ||
-                tuple!.uuid != localIdentifier {
+                tuple!.uuid == localIdentifier {
                 //If the uuid doesn't coincide or
                 // it's the same than the local identifier
                 // the information is not reliable
@@ -231,9 +359,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     public func netServiceDidPublish(_ sender: NetService) {
         if sender == localService {
             localStatus = .Available
-            let txtData = createTXTRecord()
-            localService.setTXTRecord(txtData)
-            
+            propagateLocalTxtRecord()
             setupBrowser()
         }
     }
@@ -275,11 +401,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
-//        self.inputStream = inputStream
-//        self.outputStream = outputStream
-//        openStreams()
-//        print("Service accepted")
-        
+        guard let pal = getPalWithService(sender) else {
+            return
+        }
+        currentCall = Call(pal: pal, inputStream: inputStream, outputStream: outputStream)
+        _ = acceptCall(currentCall!)
     }
     
     // MARK: NetServiceBrowserDelegate
@@ -310,7 +436,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         if !validService {
             return
         }
-        
+        print("It's a valid service \(service.name)")
         if getPalWithService(service) == nil{
             
             let existingPal = getPalWithUUID(service.uuid!)
@@ -329,7 +455,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             currentQueue?.asyncAfter(deadline: time) {
                 service.startMonitoring()
             }
-            print("Another service found")
+            print("Another service found \(service.name)")
             
             _ = addPal(withService: service)
         }
@@ -346,5 +472,46 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         }
         
     }
+    
+    // MARK: StreamDelegate
+    
+    public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+        
+        switch eventCode {
+        case Stream.Event.openCompleted:
+            print("Completed")
+        case Stream.Event.hasSpaceAvailable:
+            break
+        case Stream.Event.hasBytesAvailable:
+            var bytes = [UInt8](repeating: 0, count: maxBufferSize)
+            guard let bytesRead = self.inputStream?.read(&bytes, maxLength: maxBufferSize), bytesRead > 1 else {
+                print("Problem reading audio")
+                return
+            }
+            let data = Data(bytes: bytes, count: bytesRead)
+            inputBuffer?.append(data)
+            let completedBuffers = extractCompleteBuffers()
+            for currentBuffer in completedBuffers {
+                adProcessor?.scheduleBuffer(toPlay: currentBuffer)
+            }
+            
+        case Stream.Event.errorOccurred:
+            print("Error")
+            if let call = currentCall {
+                self.endCall(call)
+            }
+        case Stream.Event.endEncountered:
+            print("End encountered")
+            if let call = currentCall {
+                self.endCall(call)
+            }
+        default:
+            print("default")
+        }
+        
+    }
+    
+    // MARK: - ADProcessorDelegate
+    
 
 }

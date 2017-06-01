@@ -19,6 +19,10 @@
 		5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */; };
 		519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D696E1ED3EC6B00271B2C /* CallManager.swift */; };
 		519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D69701ED3EFEC00271B2C /* NearbyPal.swift */; };
+		51C8EAE41EDFDA9B0029271C /* ADProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADD1EDFDA9B0029271C /* ADProcessor.m */; };
+		51C8EAE51EDFDA9B0029271C /* AACELDDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */; };
+		51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */; };
+		51C8EAE71EDFDA9B0029271C /* EncodingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EAE31EDFDA9B0029271C /* EncodingUtils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +52,15 @@
 		5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetNameViewController.swift; sourceTree = "<group>"; };
 		519D696E1ED3EC6B00271B2C /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		519D69701ED3EFEC00271B2C /* NearbyPal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyPal.swift; sourceTree = "<group>"; };
+		51C8EADB1EDFDA9A0029271C /* AudioPal-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AudioPal-Bridging-Header.h"; sourceTree = "<group>"; };
+		51C8EADC1EDFDA9B0029271C /* ADProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ADProcessor.h; sourceTree = "<group>"; };
+		51C8EADD1EDFDA9B0029271C /* ADProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ADProcessor.m; sourceTree = "<group>"; };
+		51C8EADE1EDFDA9B0029271C /* AACELDDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AACELDDecoder.h; sourceTree = "<group>"; };
+		51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AACELDDecoder.m; sourceTree = "<group>"; };
+		51C8EAE01EDFDA9B0029271C /* AACELDEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AACELDEncoder.h; sourceTree = "<group>"; };
+		51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AACELDEncoder.m; sourceTree = "<group>"; };
+		51C8EAE21EDFDA9B0029271C /* EncodingUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EncodingUtils.hpp; sourceTree = "<group>"; };
+		51C8EAE31EDFDA9B0029271C /* EncodingUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EncodingUtils.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +102,9 @@
 		5175FCB71ECE9F1200A28166 /* AudioPal */ = {
 			isa = PBXGroup;
 			children = (
+				51C8EADA1EDFDA870029271C /* ADProcessor */,
 				5175FCB81ECE9F1200A28166 /* AppDelegate.swift */,
+				51C8EADB1EDFDA9A0029271C /* AudioPal-Bridging-Header.h */,
 				5175FCBC1ECE9F1200A28166 /* Main.storyboard */,
 				5175FCBF1ECE9F1200A28166 /* Assets.xcassets */,
 				5175FCC11ECE9F1200A28166 /* LaunchScreen.storyboard */,
@@ -112,6 +127,21 @@
 				5175FCCF1ECE9F1200A28166 /* Info.plist */,
 			);
 			path = AudioPalTests;
+			sourceTree = "<group>";
+		};
+		51C8EADA1EDFDA870029271C /* ADProcessor */ = {
+			isa = PBXGroup;
+			children = (
+				51C8EADC1EDFDA9B0029271C /* ADProcessor.h */,
+				51C8EADD1EDFDA9B0029271C /* ADProcessor.m */,
+				51C8EADE1EDFDA9B0029271C /* AACELDDecoder.h */,
+				51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */,
+				51C8EAE01EDFDA9B0029271C /* AACELDEncoder.h */,
+				51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */,
+				51C8EAE21EDFDA9B0029271C /* EncodingUtils.hpp */,
+				51C8EAE31EDFDA9B0029271C /* EncodingUtils.cpp */,
+			);
+			name = ADProcessor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -165,6 +195,7 @@
 					5175FCB41ECE9F1200A28166 = {
 						CreatedOnToolsVersion = 8.3.2;
 						DevelopmentTeam = FMC5MLL736;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 					5175FCC81ECE9F1200A28166 = {
@@ -225,7 +256,11 @@
 				5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */,
 				519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */,
 				5156E06C1EDE8FA30036E45F /* NetService+Utils.swift in Sources */,
+				51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */,
+				51C8EAE51EDFDA9B0029271C /* AACELDDecoder.m in Sources */,
 				5156E06A1EDE71730036E45F /* PalTableViewCell.swift in Sources */,
+				51C8EAE41EDFDA9B0029271C /* ADProcessor.m in Sources */,
+				51C8EAE71EDFDA9B0029271C /* EncodingUtils.cpp in Sources */,
 				519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -367,11 +402,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mistercyb.audiopal.AudioPal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AudioPal/AudioPal-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -380,11 +418,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mistercyb.audiopal.AudioPal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AudioPal/AudioPal-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
