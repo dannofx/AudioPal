@@ -11,6 +11,7 @@ import UIKit
 let domain = "local"
 let serviceType = "_apal._tcp."
 let baseServiceName = "audiopal"
+let maxBufferSize = 2048
 
 protocol CallManagerDelegate: class {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal)
@@ -20,26 +21,13 @@ protocol CallManagerDelegate: class {
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeUsername username: String)
 }
 
-struct Call {
-    let pal: NearbyPal
-    let inputStream: InputStream
-    let outputStream: OutputStream
-    
-    init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream) {
-        self.pal = pal
-        self.inputStream = inputStream
-        self.outputStream = outputStream
-    }
-}
-
-class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate {
+class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate, ADProcessorDelegate {
     var localService: NetService!
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     var currentCall: Call?
     weak var delegate: CallManagerDelegate?
-    var adProcessor: ADProcessor?
-    var inputBuffer: Data?
+
     
     private lazy var localIdentifier: UUID = {
         var uuidString = UserDefaults.standard.value(forKey: StoredValues.uuid) as? String
@@ -109,11 +97,17 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         }
         // Open Streams
         currentCall = Call(pal: pal, inputStream: inputStream!, outputStream: outputStream!)
+        guard let call = currentCall else{
+            return false
+        }
         openStreams(forCall: currentCall!)
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
+        call.startAudioProcessing()
+        call.audioProcessor?.delegate = self
         
+        return true
     }
     
     public func acceptCall(_ call: Call) -> Bool{
@@ -126,7 +120,9 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
-        
+        currentCall?.startAudioProcessing()
+        currentCall?.audioProcessor?.delegate = self
+        return true
     }
     
     public func rejectCall(_ call: Call) {
@@ -161,48 +157,6 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         call.pal.service.stop() // This really do something??
     }
     
-    // MARK: - Audio management
-    func startAudioProcessor() {
-        
-    }
-    
-    func stopAudioProcessor() {
-        
-    }
-    
-    func extractCompleteBuffers() -> [Data] {
-        
-        var completeBuffers = [Data]()
-        while inputBuffer!.count > 0 {
-            let globalBuffer = inputBuffer! as NSData
-            // Check if at least has data for the first index and the first byte
-            if (globalBuffer.length < 3) {
-                // print("Not enough received data (not even the index)")
-                return completeBuffers
-            }
-            //Index where the real data should start
-            let dataIndex =  MemoryLayout<UInt16>.size
-            // get the buffer size
-            var bufferSize_Int16: UInt16 = 0
-            globalBuffer.getBytes(&bufferSize_Int16, range: NSMakeRange(0, dataIndex))
-            let bufferSize: Int = Int(bufferSize_Int16)
-            // Check if the real data buffer can fit in the remaining data
-            let remainingSize = globalBuffer.length - bufferSize
-            if (remainingSize < bufferSize) {
-                return completeBuffers
-            }
-            // Get the actual data buffer
-            let currentBuffer = globalBuffer.subdata(with: NSMakeRange(dataIndex, bufferSize))
-            completeBuffers.append(currentBuffer)
-            // Clean from the global buffer
-            let totalSizeForBuffer = (dataIndex + bufferSize)
-            inputBuffer?.removeSubrange(0..<totalSizeForBuffer)
-        }
-        
-        return completeBuffers
-        
-    }
-    
     // MARK - TXT record utils
     
     func createTXTRecord() -> Data {
@@ -211,10 +165,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         let username_data = username.data(using: .utf8)!
         
         //Get uuid data
-        var uuid_bytes = localIdentifier.uuid
-        let uuid_data = withUnsafePointer(to: &uuid_bytes) { (unsafe_uuid) -> Data in
-            Data(bytes: unsafe_uuid, count: MemoryLayout<uuid_t>.size)
-        }
+        let uuid_data = localIdentifier.data
         
         // Get status data
         var statusValue = localStatus.rawValue
@@ -251,11 +202,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         let username =  String(data: username_data, encoding: String.Encoding.utf8)!
         
         // Decode uuid
-        var uuid_bytes: uuid_t = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-        let uuid_p1: UnsafePointer<Data> = uuid_data.withUnsafeBytes { $0 }
-        let uuid_p2: UnsafeMutablePointer<uuid_t> = withUnsafeMutablePointer(to: &uuid_bytes) { $0 }
-        memcpy(uuid_p2, uuid_p1, MemoryLayout<uuid_t>.size)
-        let uuid = UUID(uuid: uuid_bytes)
+        let uuid = UUID(data: uuid_data)!
         
         //Decode status
         let status_raw: Int = status_data.withUnsafeBytes { $0.pointee }
@@ -402,6 +349,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
         guard let pal = getPalWithService(sender) else {
+            print("Rejected service \(String(describing: sender.uuid))")
             return
         }
         currentCall = Call(pal: pal, inputStream: inputStream, outputStream: outputStream)
@@ -483,17 +431,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         case Stream.Event.hasSpaceAvailable:
             break
         case Stream.Event.hasBytesAvailable:
-            var bytes = [UInt8](repeating: 0, count: maxBufferSize)
-            guard let bytesRead = self.inputStream?.read(&bytes, maxLength: maxBufferSize), bytesRead > 1 else {
-                print("Problem reading audio")
+
+            guard let data = currentCall?.readInputBuffer() else {
                 return
             }
-            let data = Data(bytes: bytes, count: bytesRead)
-            inputBuffer?.append(data)
-            let completedBuffers = extractCompleteBuffers()
-            for currentBuffer in completedBuffers {
-                adProcessor?.scheduleBuffer(toPlay: currentBuffer)
-            }
+            currentCall?.scheduleDataToPlay(data)
             
         case Stream.Event.errorOccurred:
             print("Error")
@@ -512,6 +454,20 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     // MARK: - ADProcessorDelegate
+    
+    public func processor(_ processor: ADProcessor!, didReceiveRecordedBuffer buffer: Data!) {
+        
+        guard let call = currentCall else {
+            return
+        }
+        
+        let preparedBuffer = call.prepareOutputAudioBuffer(buffer)
+        _ = call.writeToOutputBuffer(data: preparedBuffer)
+    }
+    
+    public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
+        print("Error: Problem playing buffer \(error)")
+    }
     
 
 }

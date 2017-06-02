@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		513880431EE1260A008150BC /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513880421EE1260A008150BC /* Call.swift */; };
+		513880451EE12645008150BC /* UUID+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513880441EE12645008150BC /* UUID+Utils.swift */; };
 		5156E06A1EDE71730036E45F /* PalTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5156E0691EDE71730036E45F /* PalTableViewCell.swift */; };
 		5156E06C1EDE8FA30036E45F /* NetService+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5156E06B1EDE8FA30036E45F /* NetService+Utils.swift */; };
 		5175FCB91ECE9F1200A28166 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCB81ECE9F1200A28166 /* AppDelegate.swift */; };
@@ -36,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		513880421EE1260A008150BC /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
+		513880441EE12645008150BC /* UUID+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+Utils.swift"; sourceTree = "<group>"; };
 		5156E0691EDE71730036E45F /* PalTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PalTableViewCell.swift; sourceTree = "<group>"; };
 		5156E06B1EDE8FA30036E45F /* NetService+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NetService+Utils.swift"; sourceTree = "<group>"; };
 		5175FCB51ECE9F1200A28166 /* AudioPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,8 +117,10 @@
 				5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */,
 				5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */,
 				519D696E1ED3EC6B00271B2C /* CallManager.swift */,
+				513880421EE1260A008150BC /* Call.swift */,
 				519D69701ED3EFEC00271B2C /* NearbyPal.swift */,
 				5156E0691EDE71730036E45F /* PalTableViewCell.swift */,
+				513880441EE12645008150BC /* UUID+Utils.swift */,
 				5156E06B1EDE8FA30036E45F /* NetService+Utils.swift */,
 			);
 			path = AudioPal;
@@ -254,6 +260,8 @@
 				5175FCD91ECEA1B300A28166 /* PalsTableViewController.swift in Sources */,
 				5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */,
 				5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */,
+				513880451EE12645008150BC /* UUID+Utils.swift in Sources */,
+				513880431EE1260A008150BC /* Call.swift in Sources */,
 				519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */,
 				5156E06C1EDE8FA30036E45F /* NetService+Utils.swift in Sources */,
 				51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */,

@@ -96,7 +96,8 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     // MARK: - Table view delegate
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        callManager.
+        let pal = connectedPals[indexPath.row]
+        _ = callManager.call(toPal: pal)
     }
 
     /*
