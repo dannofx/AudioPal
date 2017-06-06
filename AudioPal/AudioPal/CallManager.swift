@@ -26,6 +26,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     var currentCall: Call?
+    var acceptedStreams: [(input: InputStream, output: OutputStream)]!
+    var nearbyPals: [NearbyPal]!
     weak var delegate: CallManagerDelegate?
 
     
@@ -41,11 +43,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         
         return uuid
     }()
-    
-    var nearbyPals: [NearbyPal] = []
 
     override init() {
-
+        acceptedStreams = []
+        nearbyPals = []
     }
     
     // MARK: - Service initialization
@@ -100,12 +101,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         guard let call = currentCall else{
             return false
         }
-        openStreams(forCall: currentCall!)
+        call.callStatus = .dealing
+        openStreams(forCall: call)
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
-        call.startAudioProcessing()
-        call.audioProcessor?.delegate = self
         
         return true
     }
@@ -114,14 +114,13 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         if localStatus != .Available {
             return false
         }
-        // Open Streams
-        currentCall = Call(pal: call.pal, inputStream: call.inputStream, outputStream: call.outputStream)
-        openStreams(forCall: currentCall!)
+        call.answerCall()
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
-        currentCall?.startAudioProcessing()
-        currentCall?.audioProcessor?.delegate = self
+        call.startAudioProcessing()
+        call.audioProcessor?.delegate = self
+        currentCall = call
         return true
     }
     
@@ -135,26 +134,112 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         propagateLocalTxtRecord()
     }
     
+    // MARK: - Stream data management
+    
+    func checkForDataToWrite(_ call: Call) {
+        if call.callStatus == .dealing {
+            let uuidData = localIdentifier.data
+            let success = call.writeToOutputBuffer(data: uuidData)
+            if success {
+                call.callStatus = .presented
+            } else {
+                endCall(call)
+            }
+        }
+    }
+    
+    func readInputData(_ inputStream: InputStream) {
+        
+        if currentCall?.inputStream == inputStream {
+            readData(fromCall: currentCall!)
+        } else {
+            readDataFromUnknownStream(inputStream: inputStream)
+        }
+    }
+    
+    func readData(fromCall call: Call) {
+        switch call.callStatus {
+        case .presented:
+            let success = call.processAnswer()
+            if success {
+                call.startAudioProcessing()
+                call.audioProcessor?.delegate = self
+            } else {
+                endCall(call)
+            }
+        case .onCall:
+            guard let data = call.readInputBuffer() else {
+                return
+            }
+            call.scheduleDataToPlay(data)
+        default:
+            break
+        }
+    }
+    
+    func readDataFromUnknownStream(inputStream: InputStream) {
+        
+        guard let data = Call.readInputStream(inputStream) else {
+            return
+        }
+        guard let foundIndex = acceptedStreams.index(where: { $0.input == inputStream }) else {
+            inputStream.close()
+            return
+        }
+        let streams = acceptedStreams[foundIndex]
+        acceptedStreams.remove(at: foundIndex)
+        
+        if currentCall != nil {
+            closeStreams(inputStream: streams.input, outputStream: streams.output)
+            return
+        }
+        guard let uuid = UUID(data: data) else {
+            closeStreams(inputStream: streams.input, outputStream: streams.output)
+            return
+        }
+        guard let pal = getPalWithUUID(uuid) else {
+            closeStreams(inputStream: streams.input, outputStream: streams.output)
+            return
+        }
+        
+        for otherStrs in acceptedStreams {
+            closeStreams(inputStream: otherStrs.input, outputStream: otherStrs.output)
+        }
+        
+        acceptedStreams.removeAll()
+        
+        currentCall = Call(pal: pal, inputStream: streams.input, outputStream: streams.output)
+        currentCall?.callStatus = .responding
+        _ = acceptCall(currentCall!)
+    }
+    
     // MARK: - Streams management
     
     private func openStreams(forCall call: Call) {
-        call.outputStream.delegate = self
-        call.outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-        call.outputStream.open()
+        openStreams(inputStream: call.inputStream, outputStream: call.outputStream)
+    }
+    
+    private func openStreams(inputStream: InputStream, outputStream: OutputStream) {
+        outputStream.delegate = self
+        outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        outputStream.open()
         
-        call.inputStream.delegate = self
-        call.inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-        call.inputStream.open()
+        inputStream.delegate = self
+        inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        inputStream.open()
     }
     
     private func closeStreams(forCall call: Call) {
-        call.outputStream.delegate = nil
-        call.outputStream.close()
-        
-        call.inputStream.delegate = nil
-        call.inputStream.close()
-        
+        closeStreams(inputStream: call.inputStream, outputStream: call.outputStream)
         call.pal.service.stop() // This really do something??
+    }
+    
+    private func closeStreams(inputStream: InputStream, outputStream: OutputStream) {
+        outputStream.delegate = nil
+        outputStream.close()
+        
+        inputStream.delegate = nil
+        inputStream.close()
     }
     
     // MARK - TXT record utils
@@ -336,7 +421,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     
     
     public func netServiceDidStop(_ sender: NetService) {
-
+        
     }
     
     
@@ -348,12 +433,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
-        guard let pal = getPalWithService(sender) else {
-            print("Rejected service \(String(describing: sender.uuid))")
-            return
-        }
-        currentCall = Call(pal: pal, inputStream: inputStream, outputStream: outputStream)
-        _ = acceptCall(currentCall!)
+        openStreams(inputStream: inputStream, outputStream: outputStream)
+        acceptedStreams.append((inputStream, outputStream))
     }
     
     // MARK: NetServiceBrowserDelegate
@@ -429,14 +510,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         case Stream.Event.openCompleted:
             print("Completed")
         case Stream.Event.hasSpaceAvailable:
-            break
-        case Stream.Event.hasBytesAvailable:
-
-            guard let data = currentCall?.readInputBuffer() else {
-                return
+            if currentCall?.outputStream == aStream {
+                checkForDataToWrite(currentCall!)
             }
-            currentCall?.scheduleDataToPlay(data)
-            
+        case Stream.Event.hasBytesAvailable:
+            readInputData(aStream as! InputStream)
         case Stream.Event.errorOccurred:
             print("Error")
             if let call = currentCall {

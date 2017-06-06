@@ -8,6 +8,8 @@
 
 import UIKit
 
+let acceptanceFlag: UInt8 = 100
+
 enum CallStatus: Int {
     case dealing
     case presented
@@ -54,7 +56,10 @@ class Call: NSObject {
     }
     
     func readInputBuffer() -> Data? {
-        
+        return Call.readInputStream(inputStream)
+    }
+    
+    class func readInputStream(_ inputStream: InputStream) -> Data?{
         var bytes = [UInt8](repeating: 0, count: maxBufferSize)
         let bytesRead = inputStream.read(&bytes, maxLength: maxBufferSize)
         if bytesRead < 1 {
@@ -62,6 +67,32 @@ class Call: NSObject {
             return nil
         }
         return Data(bytes: bytes, count: bytesRead)
+    }
+    
+    func answerCall() {
+        if outputStream.hasSpaceAvailable {
+            var flag = acceptanceFlag
+            outputStream.write(&flag, maxLength: 1)
+            callStatus = .onCall
+        }
+    }
+    
+    func processAnswer() -> Bool {
+        if callStatus != .presented {
+            return false
+        }
+        if inputStream.hasBytesAvailable {
+            var flag: UInt8 = 0
+            inputStream.read(&flag, maxLength: 1)
+            if flag == acceptanceFlag {
+                callStatus = .onCall
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        return false
     }
     
     func scheduleDataToPlay(_ data: Data) {
