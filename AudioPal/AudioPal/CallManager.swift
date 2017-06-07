@@ -97,11 +97,12 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             return false
         }
         // Open Streams
-        currentCall = Call(pal: pal, inputStream: inputStream!, outputStream: outputStream!)
+        currentCall = Call(pal: pal, inputStream: inputStream!,
+                           outputStream: outputStream!,
+                           asCaller: true)
         guard let call = currentCall else{
             return false
         }
-        call.callStatus = .dealing
         openStreams(forCall: call)
         // Update information for nearby pals
         localStatus = .Occupied
@@ -124,27 +125,28 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         return true
     }
     
-    public func rejectCall(_ call: Call) {
-        // TODO: Pending implementation
-    }
-    
     public func endCall(_ call: Call) {
+        call.stopAudioProcessing()
         closeStreams(forCall: call)
         localStatus = .Available
         propagateLocalTxtRecord()
+        if call == currentCall {
+            currentCall = nil
+        }
+        
+        print("Call ended")
     }
     
     // MARK: - Stream data management
     
     func checkForDataToWrite(_ call: Call) {
         if call.callStatus == .dealing {
-            let uuidData = localIdentifier.data
-            let success = call.writeToOutputBuffer(data: uuidData)
-            if success {
-                call.callStatus = .presented
-            } else {
+            let success = call.sendCallerInfo(localIdentifier)
+            if !success {
                 endCall(call)
             }
+        } else if call.callStatus == .responding {
+            call.answerCall()
         }
     }
     
@@ -208,8 +210,9 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         
         acceptedStreams.removeAll()
         
-        currentCall = Call(pal: pal, inputStream: streams.input, outputStream: streams.output)
-        currentCall?.callStatus = .responding
+        currentCall = Call(pal: pal, inputStream: streams.input,
+                           outputStream: streams.output,
+                           asCaller: false)
         _ = acceptCall(currentCall!)
     }
     
@@ -368,7 +371,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         pal.status = data.status
         
         if oldStatus != pal.status {
-            if pal.status == .Available {
+            if pal.status == .Available && oldStatus == .NoAvailable {
                 delegate?.callManager(self, didDetectNearbyPal: pal)
             } else if pal.status == .NoAvailable {
                 // I keep the pal, but it isn't available for the client until
@@ -433,8 +436,16 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }
     
     public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
-        openStreams(inputStream: inputStream, outputStream: outputStream)
-        acceptedStreams.append((inputStream, outputStream))
+        if currentCall == nil {
+            openStreams(inputStream: inputStream, outputStream: outputStream)
+            acceptedStreams.append((inputStream, outputStream))
+        } else {
+            // Reject call automatically, the user is busy
+            inputStream.open()
+            outputStream.open()
+            inputStream.close()
+            outputStream.close()
+        }
     }
     
     // MARK: NetServiceBrowserDelegate

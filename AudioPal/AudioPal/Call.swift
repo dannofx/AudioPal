@@ -23,25 +23,37 @@ class Call: NSObject {
     let pal: NearbyPal
     let inputStream: InputStream
     let outputStream: OutputStream
-    var callStatus: CallStatus
+    private (set) var callStatus: CallStatus
     var audioProcessor: ADProcessor?
     var inputBuffer: Data?
     
-    init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream) {
+    init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream, asCaller caller: Bool) {
         self.pal = pal
         self.inputStream = inputStream
         self.outputStream = outputStream
-        self.callStatus = .dealing
+        if caller {
+            self.callStatus = .dealing
+        } else {
+            self.callStatus = .responding
+        }
     }
     
     func startAudioProcessing() {
+        if audioProcessor != nil {
+            return
+        }
         inputBuffer = Data()
         audioProcessor = ADProcessor()
         audioProcessor?.start()
     }
     
     func stopAudioProcessing() {
-        // TODO: What to do here?
+        if audioProcessor == nil {
+            return
+        }
+        inputBuffer = nil;
+        audioProcessor?.stop()
+        audioProcessor = nil
     }
     
     func writeToOutputBuffer(data: Data) -> Bool {
@@ -69,11 +81,23 @@ class Call: NSObject {
         return Data(bytes: bytes, count: bytesRead)
     }
     
+    func sendCallerInfo(_ uuid: UUID) -> Bool{
+        let uuidData = uuid.data
+        let success = writeToOutputBuffer(data: uuidData)
+        if success {
+            callStatus = .presented
+        }
+        return success
+    }
+    
     func answerCall() {
         if outputStream.hasSpaceAvailable {
             var flag = acceptanceFlag
             outputStream.write(&flag, maxLength: 1)
+            print("Call started: accepted")
             callStatus = .onCall
+        } else {
+            print("The call was not answered")
         }
     }
     
@@ -85,6 +109,7 @@ class Call: NSObject {
             var flag: UInt8 = 0
             inputStream.read(&flag, maxLength: 1)
             if flag == acceptanceFlag {
+                print("Call started: acceptance")
                 callStatus = .onCall
                 return true
             } else {

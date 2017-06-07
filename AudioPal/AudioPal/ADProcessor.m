@@ -41,6 +41,7 @@ static UInt32 const m_encBitrate = 32000;
 @end
 
 @implementation ADProcessor
+@synthesize isStarted = _isStarted;
 
 #pragma mark - Initialization
 - (id)init {
@@ -51,6 +52,7 @@ static UInt32 const m_encBitrate = 32000;
         m_encoder = nil;
         m_decoder = nil;
         _useSpeakers = NO;
+        _isStarted = NO;
         receivedBuffersQueue = dispatch_queue_create("audiopal.adprocessor", DISPATCH_QUEUE_SERIAL);
         
         [self initializeAudioUnit];
@@ -196,22 +198,28 @@ static UInt32 const m_encBitrate = 32000;
 
 #pragma mark - Client methods
 
-- (BOOL)start {
+- (void)start {
     
+    if (self.isStarted) {
+        return;
+    }
+    _isStarted = YES;
     receivedBuffers = [[NSMutableArray alloc] init];
     audioOutputClean = YES;
     AudioUnitInitialize(m_audioComponent);
     AudioOutputUnitStart(m_audioComponent);
-    return YES;
 }
 
-- (BOOL)stop {
-    //
+- (void)stop {
+    if (!self.isStarted) {
+        return;
+    }
+    _isStarted = NO;
+    [receivedBuffers removeAllObjects];
     receivedBuffers = nil;
-//    //stop audiounits
-//    AudioOutputUnitStop(self.audioUnit);
-//    AudioComponentInstanceDispose(self.audioUnit);
-    return YES;
+    //stop audiounits
+    AudioOutputUnitStop(m_audioComponent);
+    AudioComponentInstanceDispose(m_audioComponent);
 }
 
 - (void)scheduleBufferToPlay:(NSData *)buffer {
