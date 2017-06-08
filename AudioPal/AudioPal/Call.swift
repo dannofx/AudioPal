@@ -68,7 +68,7 @@ class Call: NSObject {
     }
     
     func readInputBuffer() -> Data? {
-        return Call.readInputStream(inputStream)
+        return type(of: self).readInputStream(inputStream)
     }
     
     class func readInputStream(_ inputStream: InputStream) -> Data?{

@@ -28,6 +28,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
     var nearbyPals: [NearbyPal]!
+    let interactionProvider: CallInteractionProvider
     weak var delegate: CallManagerDelegate?
 
     
@@ -45,6 +46,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }()
 
     override init() {
+        interactionProvider = CallInteractionProvider(withCallManager: self)
         acceptedStreams = []
         nearbyPals = []
     }
@@ -73,10 +75,10 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     public func start() {
         setupService()
 
-//        Meter todo dentro de call (ADProcessor e input buffer)
-//        Instanciar el procesador de audio cuando es debido
-//        Probar los metodos de desconexion e implementar rechazar llamada
-//        Hay que manejar los errores de streams como desconexiones.
+        // Integrar CallKit
+        // Agregar features de mute, sin sonido y altavoz
+        // Revisar que pasa si se conectan audifonos
+        // Revisar desconexiones.
 
     }
 

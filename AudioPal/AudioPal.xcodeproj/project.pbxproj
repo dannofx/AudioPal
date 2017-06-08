@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5131CFEE1EE905C6006E99DC /* CallInteractionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5131CFED1EE905C6006E99DC /* CallInteractionProvider.swift */; };
 		513880431EE1260A008150BC /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513880421EE1260A008150BC /* Call.swift */; };
 		513880451EE12645008150BC /* UUID+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513880441EE12645008150BC /* UUID+Utils.swift */; };
 		5156E06A1EDE71730036E45F /* PalTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5156E0691EDE71730036E45F /* PalTableViewCell.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5131CFED1EE905C6006E99DC /* CallInteractionProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallInteractionProvider.swift; sourceTree = "<group>"; };
 		513880421EE1260A008150BC /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		513880441EE12645008150BC /* UUID+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+Utils.swift"; sourceTree = "<group>"; };
 		5156E0691EDE71730036E45F /* PalTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PalTableViewCell.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				5175FCC11ECE9F1200A28166 /* LaunchScreen.storyboard */,
 				5175FCC41ECE9F1200A28166 /* Info.plist */,
 				5175FCDA1ECEA3D900A28166 /* Constants.swift */,
+				5131CFED1EE905C6006E99DC /* CallInteractionProvider.swift */,
 				5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */,
 				5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */,
 				519D696E1ED3EC6B00271B2C /* CallManager.swift */,
@@ -262,6 +265,7 @@
 				5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */,
 				513880451EE12645008150BC /* UUID+Utils.swift in Sources */,
 				513880431EE1260A008150BC /* Call.swift in Sources */,
+				5131CFEE1EE905C6006E99DC /* CallInteractionProvider.swift in Sources */,
 				519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */,
 				5156E06C1EDE8FA30036E45F /* NetService+Utils.swift in Sources */,
 				51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */,
