@@ -46,9 +46,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     }()
 
     override init() {
-        interactionProvider = CallInteractionProvider(withCallManager: self)
+        interactionProvider = CallInteractionProvider()
         acceptedStreams = []
         nearbyPals = []
+        super.init()
+        interactionProvider.callManager = self
     }
     
     // MARK: - Service initialization
@@ -109,6 +111,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
+        //interactionProvider.startInteraction(withCall: call)
         
         return true
     }
@@ -147,8 +150,6 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             if !success {
                 endCall(call)
             }
-        } else if call.callStatus == .responding {
-            call.answerCall()
         }
     }
     
@@ -215,7 +216,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         currentCall = Call(pal: pal, inputStream: streams.input,
                            outputStream: streams.output,
                            asCaller: false)
-        _ = acceptCall(currentCall!)
+        interactionProvider.reportIncomingCall(call: currentCall!)
     }
     
     // MARK: - Streams management

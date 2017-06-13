@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 import CallKit
+import AVFoundation
+import AudioToolbox
 
 class CallInteractionProvider: NSObject {
     fileprivate let provider: CXProvider
@@ -16,8 +18,7 @@ class CallInteractionProvider: NSObject {
     fileprivate var incomingCalls: [Call]
     weak var callManager: CallManager?
     
-    init(withCallManager callManager: CallManager) {
-        self.callManager = callManager
+    override init() {
         incomingCalls = []
         callController = CXCallController()
         provider = CXProvider(configuration: type(of: self).createProviderConfiguration())
@@ -80,7 +81,7 @@ extension CallInteractionProvider {
                 self.callManager?.endCall(call)
             }
             
-            completion?(error as? NSError)
+            completion?(error as NSError?)
         }
     }
     
@@ -103,11 +104,11 @@ extension CallInteractionProvider: CXProviderDelegate {
     func providerDidReset(_ provider: CXProvider) {
         print("Provider did reset")
         
-        guard let call = (callManager?.currentCall) else {
-            return
-        }
-        
-        callManager?.endCall(call)
+//        guard let call = (callManager?.currentCall) else {
+//            return
+//        }
+//        
+//        callManager?.endCall(call)
     }
     
     func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
@@ -216,6 +217,21 @@ extension CallInteractionProvider: CXProviderDelegate {
         print("Timed out \(#function)")
         
         // React to the action timeout if necessary, such as showing an error UI.
+    }
+    
+    func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
+        print("Received \(#function)")
+        El audio debe ser configurado aquí
+        // Start call audio media, now that the audio session has been activated after having its priority boosted.
+    }
+    
+    func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
+        print("Received \(#function)")
+        
+        /*
+         Restart any non-call related audio now that the app's audio session has been
+         de-activated after having its priority restored to normal.
+         */
     }
     
 }
