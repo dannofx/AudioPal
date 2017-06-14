@@ -32,7 +32,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     weak var delegate: CallManagerDelegate?
 
     
-    private lazy var localIdentifier: UUID = {
+    fileprivate lazy var localIdentifier: UUID = {
         var uuidString = UserDefaults.standard.value(forKey: StoredValues.uuid) as? String
         var uuid: UUID!
         if (uuidString == nil) {
@@ -53,14 +53,18 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         interactionProvider.callManager = self
     }
     
-    // MARK: - Service initialization
+}
+
+// MARK: - Service initialization
+
+extension CallManager {
     
     func setupService() {
         localService = NetService(domain: domain,
-                                    type: serviceType,
-                                baseName: baseServiceName,
-                                    uuid: localIdentifier,
-                                    port: 0)
+                                  type: serviceType,
+                                  baseName: baseServiceName,
+                                  uuid: localIdentifier,
+                                  port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
         localService.publish(options: .listenForConnections)
@@ -73,24 +77,27 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         serviceBrowser.searchForServices(ofType: serviceType, inDomain: domain)
         
     }
-
+    
     public func start() {
         setupService()
-
+        
         // Integrar CallKit
         // Agregar features de mute, sin sonido y altavoz
         // Revisar que pasa si se conectan audifonos
         // Revisar desconexiones.
-
+        
     }
-
+    
     public func stop() {
-
+        
     }
+}
+
+// MARK: - Call amangement
+
+extension CallManager {
     
-    // MARK: - Call amangement
-    
-    public func call(toPal pal: NearbyPal) -> Bool {
+    public func startCall(toPal pal: NearbyPal) -> Bool {
         if localStatus != .Available {
             return false
         }
@@ -111,12 +118,20 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
-        //interactionProvider.startInteraction(withCall: call)
-        
+        interactionProvider.startInteraction(withCall: call)
         return true
     }
     
-    public func acceptCall(_ call: Call) -> Bool{
+    public func prepareOutgoingCall(_ call: Call) -> Bool {
+        
+        if currentCall != call {
+            return false
+        }
+        call.prepareForAudioProcessing()
+        return true
+    }
+    
+    public func acceptIncomingCall(_ call: Call) -> Bool{
         if localStatus != .Available {
             return false
         }
@@ -124,7 +139,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
-        call.startAudioProcessing()
+        call.prepareForAudioProcessing()
         call.audioProcessor?.delegate = self
         currentCall = call
         return true
@@ -141,8 +156,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         
         print("Call ended")
     }
-    
-    // MARK: - Stream data management
+}
+
+// MARK: - Stream data management
+
+extension CallManager {
     
     func checkForDataToWrite(_ call: Call) {
         if call.callStatus == .dealing {
@@ -167,8 +185,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         case .presented:
             let success = call.processAnswer()
             if success {
-                call.startAudioProcessing()
                 call.audioProcessor?.delegate = self
+                interactionProvider.reportOutgoingCall(call: call)
             } else {
                 endCall(call)
             }
@@ -218,14 +236,17 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
                            asCaller: false)
         interactionProvider.reportIncomingCall(call: currentCall!)
     }
-    
-    // MARK: - Streams management
-    
-    private func openStreams(forCall call: Call) {
+}
+
+// MARK: - Streams management
+
+private extension CallManager {
+
+    func openStreams(forCall call: Call) {
         openStreams(inputStream: call.inputStream, outputStream: call.outputStream)
     }
     
-    private func openStreams(inputStream: InputStream, outputStream: OutputStream) {
+    func openStreams(inputStream: InputStream, outputStream: OutputStream) {
         outputStream.delegate = self
         outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
         outputStream.open()
@@ -235,20 +256,23 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         inputStream.open()
     }
     
-    private func closeStreams(forCall call: Call) {
+    func closeStreams(forCall call: Call) {
         closeStreams(inputStream: call.inputStream, outputStream: call.outputStream)
         call.pal.service.stop() // This really do something??
     }
     
-    private func closeStreams(inputStream: InputStream, outputStream: OutputStream) {
+    func closeStreams(inputStream: InputStream, outputStream: OutputStream) {
         outputStream.delegate = nil
         outputStream.close()
         
         inputStream.delegate = nil
         inputStream.close()
     }
-    
-    // MARK - TXT record utils
+}
+
+// MARK - TXT record utils
+
+extension CallManager {
     
     func createTXTRecord() -> Data {
         // Get username data
@@ -334,8 +358,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             print("Peer not fully resolved")
         }
     }
-    
-    // MARK: - Nearby pal utils
+}
+
+// MARK: - Nearby pal utils
+
+extension CallManager {
     
     func getPalWithService(_ service: NetService) -> NearbyPal? {
         return nearbyPals.filter{ $0.service == service }.first
@@ -390,9 +417,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         }
         
     }
-    
-    
-    // MARK: - NetServiceDelegate
+}
+
+// MARK: - NetServiceDelegate
+
+extension CallManager {
     
     public func netServiceDidPublish(_ sender: NetService) {
         if sender == localService {
@@ -450,8 +479,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
             outputStream.close()
         }
     }
-    
-    // MARK: NetServiceBrowserDelegate
+}
+
+// MARK: NetServiceBrowserDelegate
+
+extension CallManager {
     
     public func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {
         
@@ -515,8 +547,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         }
         
     }
-    
-    // MARK: StreamDelegate
+}
+
+// MARK: StreamDelegate
+
+extension CallManager {
     
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         
@@ -544,8 +579,11 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         }
         
     }
-    
-    // MARK: - ADProcessorDelegate
+}
+
+// MARK: - ADProcessorDelegate
+
+extension CallManager {
     
     public func processor(_ processor: ADProcessor!, didReceiveRecordedBuffer buffer: Data!) {
         
@@ -560,6 +598,4 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
         print("Error: Problem playing buffer \(error)")
     }
-    
-
 }

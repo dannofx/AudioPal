@@ -38,12 +38,20 @@ class Call: NSObject {
         }
     }
     
-    func startAudioProcessing() {
+    func prepareForAudioProcessing() {
         if audioProcessor != nil {
             return
         }
-        inputBuffer = Data()
         audioProcessor = ADProcessor()
+    }
+    
+    func startAudioProcessing() {
+        
+//        if (audioProcessor != nil) && !(audioProcessor!.isStarted)  {
+//            return
+//        }
+
+        inputBuffer = Data()
         audioProcessor?.start()
     }
     

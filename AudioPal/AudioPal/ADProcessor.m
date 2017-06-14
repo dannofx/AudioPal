@@ -98,8 +98,8 @@ static UInt32 const m_encBitrate = 32000;
     Float32 preferredBufferTime = ((Float32)m_frameSize) / ((Float64)m_sampleRate);
     [session setPreferredIOBufferDuration:preferredBufferTime error:&sError];
     [self printErrorIfNecessary:sError];
-    [session setActive:YES error:&sError];
-    [self printErrorIfNecessary:sError];
+    //[session setActive:YES error:&sError];
+    //[self printErrorIfNecessary:sError];
     
     //Initialize buffers
     m_inputByteSize  = m_frameSize * m_inChannels  * sizeof(SInt32);
@@ -208,6 +208,8 @@ static UInt32 const m_encBitrate = 32000;
     audioOutputClean = YES;
     AudioUnitInitialize(m_audioComponent);
     AudioOutputUnitStart(m_audioComponent);
+    
+    NSLog(@"Audio processing started");
 }
 
 - (void)stop {

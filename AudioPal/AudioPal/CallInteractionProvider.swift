@@ -15,11 +15,11 @@ import AudioToolbox
 class CallInteractionProvider: NSObject {
     fileprivate let provider: CXProvider
     fileprivate let callController: CXCallController
-    fileprivate var incomingCalls: [Call]
+    fileprivate var calls: [Call]
     weak var callManager: CallManager?
     
     override init() {
-        incomingCalls = []
+        calls = []
         callController = CXCallController()
         provider = CXProvider(configuration: type(of: self).createProviderConfiguration())
         super.init()
@@ -34,6 +34,10 @@ class CallInteractionProvider: NSObject {
         
         return providerConfiguration
     }
+    
+    deinit {
+        provider.invalidate()
+    }
 }
 
 // MARK: Actions
@@ -44,9 +48,8 @@ extension CallInteractionProvider {
         let handle = CXHandle(type: .generic, value: call.pal.username!)
         let startCallAction = CXStartCallAction(call: call.pal.uuid!,
                                                 handle: handle)
-        
         startCallAction.isVideo = false
-        
+        calls.append(call)
         let transaction = CXTransaction()
         transaction.addAction(startCallAction)
         requestTransaction(transaction)
@@ -71,18 +74,19 @@ extension CallInteractionProvider {
         let update = CXCallUpdate()
         update.remoteHandle = CXHandle(type: .generic, value: call.pal.username!)
         update.hasVideo = false
-        incomingCalls.append(call)
+        calls.append(call)
         provider.reportNewIncomingCall(with: call.pal.uuid!, update: update) { error in
-            /*
-             Only add incoming call to the app's list of calls if the call was allowed (i.e. there was no error)
-             since calls may be "denied" for various legitimate reasons. See CXErrorCodeIncomingCallError.
-             */
             if error != nil {
                 self.callManager?.endCall(call)
             }
-            
             completion?(error as NSError?)
         }
+    }
+    
+    func reportOutgoingCall(call: Call) {
+        provider.reportOutgoingCall(with: call.pal.uuid!, startedConnectingAt: nil)
+        provider.reportOutgoingCall(with: call.pal.uuid!, connectedAt: nil)
+    
     }
     
     private func requestTransaction(_ transaction: CXTransaction) {
@@ -102,7 +106,6 @@ extension CallInteractionProvider: CXProviderDelegate {
     
     
     func providerDidReset(_ provider: CXProvider) {
-        print("Provider did reset")
         
 //        guard let call = (callManager?.currentCall) else {
 //            return
@@ -113,42 +116,23 @@ extension CallInteractionProvider: CXProviderDelegate {
     
     func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
         
-        action.fulfill()
+        guard let callManager = callManager else {
+            action.fail()
+            return
+        }
         
-//        // Create & configure an instance of SpeakerboxCall, the app's model class representing the new outgoing call.
-//        let call = SpeakerboxCall(uuid: action.callUUID, isOutgoing: true)
-//        call.handle = action.handle.value
-//        
-//        /*
-//         Configure the audio session, but do not start call audio here, since it must be done once
-//         the audio session has been activated by the system after having its priority elevated.
-//         */
-//        configureAudioSession()
-//        
-//        /*
-//         Set callback blocks for significant events in the call's lifecycle, so that the CXProvider may be updated
-//         to reflect the updated state.
-//         */
-//        call.hasStartedConnectingDidChange = { [weak self] in
-//            self?.provider.reportOutgoingCall(with: call.uuid, startedConnectingAt: call.connectingDate)
-//        }
-//        call.hasConnectedDidChange = { [weak self] in
-//            self?.provider.reportOutgoingCall(with: call.uuid, connectedAt: call.connectDate)
-//        }
-//        
-//        // Trigger the call to be started via the underlying network service.
-//        call.startSpeakerboxCall { success in
-//            if success {
-//                // Signal to the system that the action has been successfully performed.
-//                action.fulfill()
-//                
-//                // Add the new outgoing call to the app's list of calls.
-//                self.callManager.addCall(call)
-//            } else {
-//                // Signal to the system that the action was unable to be performed.
-//                action.fail()
-//            }
-//        }
+        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
+            action.fail()
+            return
+        }
+        
+        let success = callManager.prepareOutgoingCall(call)
+        if success {
+            action.fulfill()
+        } else {
+            action.fail()
+        }
+        
     }
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
@@ -158,18 +142,17 @@ extension CallInteractionProvider: CXProviderDelegate {
             return
         }
         
-        guard let call = (incomingCalls.filter{ $0.pal.uuid == action.callUUID}.first) else {
+        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
             action.fail()
             return
         }
         
-        let success = callManager.acceptCall(call)
+        let success = callManager.acceptIncomingCall(call)
         if success {
             action.fulfill()
         } else {
             action.fail()
         }
-        incomingCalls.removeAll()
     }
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
@@ -179,17 +162,15 @@ extension CallInteractionProvider: CXProviderDelegate {
             return
         }
 
-        guard let call = (incomingCalls.filter{ $0.pal.uuid == action.callUUID}.first) else {
+        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
             action.fail()
             return
         }
         
         callManager.endCall(call)
+        calls.removeAll()
         
-        // Signal to the system that the action has been successfully performed.
         action.fulfill()
-        incomingCalls.removeAll()
-
     }
     
     func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
@@ -215,14 +196,11 @@ extension CallInteractionProvider: CXProviderDelegate {
     
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
         print("Timed out \(#function)")
-        
-        // React to the action timeout if necessary, such as showing an error UI.
     }
     
     func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        print("Received \(#function)")
-        El audio debe ser configurado aquí
-        // Start call audio media, now that the audio session has been activated after having its priority boosted.
+
+        callManager?.currentCall?.startAudioProcessing()
     }
     
     func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
