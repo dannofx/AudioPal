@@ -10,13 +10,13 @@ import UIKit
 
 class SetNameViewController: UIViewController, UITextFieldDelegate {
     
-    @IBOutlet weak var nameTextField: UITextField?
-    @IBOutlet weak var startButton: UIButton?
+    @IBOutlet weak var nameTextField: UITextField!
+    @IBOutlet weak var startButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        startButton?.isEnabled = false
-        nameTextField?.delegate = self
+        startButton.isEnabled = false
+        nameTextField.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -26,7 +26,7 @@ class SetNameViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func didChangeText(sender: UITextField) {
         
-        startButton?.isEnabled = sender.text != ""
+        startButton.isEnabled = sender.text != ""
         
     }
     @IBAction func startApp(sender: UIButton) {

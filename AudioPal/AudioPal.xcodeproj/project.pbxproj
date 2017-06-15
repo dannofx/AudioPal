@@ -22,6 +22,7 @@
 		5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */; };
 		519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D696E1ED3EC6B00271B2C /* CallManager.swift */; };
 		519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D69701ED3EFEC00271B2C /* NearbyPal.swift */; };
+		51B813EA1EF19C38007CA2EA /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B813E91EF19C38007CA2EA /* CallViewController.swift */; };
 		51C8EAE41EDFDA9B0029271C /* ADProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADD1EDFDA9B0029271C /* ADProcessor.m */; };
 		51C8EAE51EDFDA9B0029271C /* AACELDDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */; };
 		51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */; };
@@ -58,6 +59,7 @@
 		5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetNameViewController.swift; sourceTree = "<group>"; };
 		519D696E1ED3EC6B00271B2C /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		519D69701ED3EFEC00271B2C /* NearbyPal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyPal.swift; sourceTree = "<group>"; };
+		51B813E91EF19C38007CA2EA /* CallViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
 		51C8EADB1EDFDA9A0029271C /* AudioPal-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AudioPal-Bridging-Header.h"; sourceTree = "<group>"; };
 		51C8EADC1EDFDA9B0029271C /* ADProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ADProcessor.h; sourceTree = "<group>"; };
 		51C8EADD1EDFDA9B0029271C /* ADProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ADProcessor.m; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */,
 				5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */,
 				5131CFED1EE905C6006E99DC /* CallInteractionProvider.swift */,
+				51B813E91EF19C38007CA2EA /* CallViewController.swift */,
 				519D696E1ED3EC6B00271B2C /* CallManager.swift */,
 				513880421EE1260A008150BC /* Call.swift */,
 				519D69701ED3EFEC00271B2C /* NearbyPal.swift */,
@@ -278,6 +281,7 @@
 				5156E06A1EDE71730036E45F /* PalTableViewCell.swift in Sources */,
 				51C8EAE41EDFDA9B0029271C /* ADProcessor.m in Sources */,
 				51C8EAE71EDFDA9B0029271C /* EncodingUtils.cpp in Sources */,
+				51B813EA1EF19C38007CA2EA /* CallViewController.swift in Sources */,
 				519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

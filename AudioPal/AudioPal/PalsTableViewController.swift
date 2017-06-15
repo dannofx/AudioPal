@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PalsTableViewController: UITableViewController, CallManagerDelegate {
+class PalsTableViewController: UITableViewController, PalConnectionDelegate {
     var callManager: CallManager
     var connectedPals: [NearbyPal]
     
@@ -59,22 +59,45 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
     }
     
     func startCallManager() {
-        callManager.delegate = self
+        callManager.palDelegate = self
         callManager.start()
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == StoryboardSegues.showCall {
+            let callViewController = segue.destination as! CallViewController
+            callViewController.callManager = callManager
+        }
+    }
     
+    // MARK: - Notifications
+    func registerForNotifications() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: NotificationNames.userReady),
+                                               object: nil,
+                                               queue: nil) { (notification) in
+                                                self.userName = (notification.userInfo![StoredValues.username] as! String)
+                                                self.startCallManager()
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
-    // MARK: - Table view data source
+}
 
+// MARK: - Table view data source
+
+extension PalsTableViewController {
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return connectedPals.count
     }
-
+    
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "palCell", for: indexPath) as! PalTableViewCell
@@ -82,7 +105,7 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
         cell.configure(withPal: pal)
         return cell
     }
- 
+    
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
@@ -90,37 +113,24 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        }
     }
- 
-    // MARK: - Table view delegate
+}
+
+// MARK: - Table view delegate
+
+extension PalsTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pal = connectedPals[indexPath.row]
         _ = callManager.startCall(toPal: pal)
     }
+}
 
-    /*
-    // MARK: - Navigation
+// MARK: - PalConnectionDelegate
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
+extension PalsTableViewController {
     
-    // MARK: - Notifications
-    func registerForNotifications() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: NotificationNames.userReady),
-                                               object: nil,
-                                               queue: nil) { (notification) in
-                                                    self.userName = (notification.userInfo![StoredValues.username] as! String)
-                                                    self.startCallManager()
-                                                }
-    }
-    
-    // MARK: - CallManagerDelegate
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
         print("Inserting")
         tableView.beginUpdates()
@@ -154,6 +164,10 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
         updateCell(forPal: pal)
     }
     
+    func callManager(_ callManager: CallManager, didStartCallWithPal pal: NearbyPal) {
+        performSegue(withIdentifier: StoryboardSegues.showCall, sender: self)
+    }
+    
     func updateCell(forPal pal: NearbyPal) {
         guard let index = connectedPals.index(of: pal) else {
             return
@@ -164,9 +178,4 @@ class PalsTableViewController: UITableViewController, CallManagerDelegate {
         tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
     }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-
 }

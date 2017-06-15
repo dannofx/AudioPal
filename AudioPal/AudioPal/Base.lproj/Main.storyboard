@@ -47,10 +47,76 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Root View Controller" id="eXe-SV-foD"/>
+                    <connections>
+                        <segue destination="gpO-9X-0iH" kind="presentation" identifier="showCall" id="uyS-6Z-gjn"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x7D-iz-hJQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="936.79999999999995" y="126.38680659670166"/>
+        </scene>
+        <!--Call View Controller-->
+        <scene sceneID="pii-xS-ZlR">
+            <objects>
+                <viewController id="gpO-9X-0iH" customClass="CallViewController" customModule="AudioPal" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Pi6-dZ-15P"/>
+                        <viewControllerLayoutGuide type="bottom" id="O3y-3h-2cO"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="wpf-kg-pQq">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Ej-PE-QEh">
+                                <rect key="frame" x="65" y="66" width="244" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A0f-tG-ApU">
+                                <rect key="frame" x="65" y="95" width="244" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ae4-or-Y78">
+                                <rect key="frame" x="146" y="311" width="58" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Hang up"/>
+                                <connections>
+                                    <action selector="hangUpWithSender:" destination="gpO-9X-0iH" eventType="touchUpInside" id="fha-mk-h4J"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vHQ-mJ-its">
+                                <rect key="frame" x="87" y="311" width="35" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Mute"/>
+                                <connections>
+                                    <action selector="toggleMuteWithSender:" destination="gpO-9X-0iH" eventType="touchUpInside" id="RiF-ah-Lrv"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Soz-9d-9oq">
+                                <rect key="frame" x="232" y="311" width="56" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Speaker"/>
+                                <connections>
+                                    <action selector="toggleSpeakerWithSender:" destination="gpO-9X-0iH" eventType="touchUpInside" id="Bb9-1f-EUw"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.088993409863945577" blue="0.50961947278911568" alpha="1" colorSpace="calibratedRGB"/>
+                    </view>
+                    <connections>
+                        <outlet property="hang_button" destination="ae4-or-Y78" id="Th5-Sx-tCq"/>
+                        <outlet property="mute_button" destination="vHQ-mJ-its" id="sQQ-DV-C3M"/>
+                        <outlet property="speaker_button" destination="Soz-9d-9oq" id="a1N-GW-ZIk"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="XWJ-cW-C1P" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1856.8" y="125.4872563718141"/>
         </scene>
         <!--Set Name View Controller-->
         <scene sceneID="U3c-Zu-Dza">

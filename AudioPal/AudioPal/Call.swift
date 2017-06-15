@@ -11,11 +11,9 @@ import UIKit
 let acceptanceFlag: UInt8 = 100
 
 enum CallStatus: Int {
-    case dealing
+    case dialing
     case presented
-    case waitingResponse
     case onCall
-    case rejected
     case responding
 }
 
@@ -23,16 +21,22 @@ class Call: NSObject {
     let pal: NearbyPal
     let inputStream: InputStream
     let outputStream: OutputStream
+    let uuid: UUID
     private (set) var callStatus: CallStatus
     var audioProcessor: ADProcessor?
     var inputBuffer: Data?
+    var interactionEnded: Bool // Refers to CallKit UI
+    var ended: Bool // Tells if the call was ended (there is no audio nor transmission)
     
     init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream, asCaller caller: Bool) {
         self.pal = pal
         self.inputStream = inputStream
         self.outputStream = outputStream
+        uuid = UUID()
+        ended = false
+        interactionEnded = false
         if caller {
-            self.callStatus = .dealing
+            self.callStatus = .dialing
         } else {
             self.callStatus = .responding
         }

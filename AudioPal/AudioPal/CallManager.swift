@@ -13,12 +13,21 @@ let serviceType = "_apal._tcp."
 let baseServiceName = "audiopal"
 let maxBufferSize = 2048
 
-protocol CallManagerDelegate: class {
+protocol PalConnectionDelegate: class {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectCallError error: Error, withPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeStatus status: PalStatus)
     func callManager(_ callManager: CallManager, didPal pal: NearbyPal, changeUsername username: String)
+    func callManager(_ callManager: CallManager, didStartCallWithPal pal: NearbyPal)
+}
+
+protocol CallManagerDelegate: class {
+    func callManager(_ callManager: CallManager, didStartCall call: Call)
+    func callManager(_ callManager: CallManager, didEstablishCall call: Call)
+    func callManager(_ callManager: CallManager, didEndCall call: Call, error: Error?)
+    func callManager(_ callManager: CallManager, didMute: Bool, call: Call)
+    func callManager(_ callManager: CallManager, didActivateSpeaker: Bool, call: Call)
 }
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate, ADProcessorDelegate {
@@ -29,6 +38,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
     var nearbyPals: [NearbyPal]!
     let interactionProvider: CallInteractionProvider
+    weak var palDelegate: PalConnectionDelegate?
     weak var delegate: CallManagerDelegate?
 
     
@@ -128,6 +138,7 @@ extension CallManager {
             return false
         }
         call.prepareForAudioProcessing()
+        reportStartedCall(call)
         return true
     }
     
@@ -140,8 +151,8 @@ extension CallManager {
         localStatus = .Occupied
         propagateLocalTxtRecord()
         call.prepareForAudioProcessing()
-        call.audioProcessor?.delegate = self
         currentCall = call
+        reportEstablishedCall(call)
         return true
     }
     
@@ -150,11 +161,28 @@ extension CallManager {
         closeStreams(forCall: call)
         localStatus = .Available
         propagateLocalTxtRecord()
+        call.ended = true
         if call == currentCall {
             currentCall = nil
         }
-        
+        if !call.interactionEnded {
+            interactionProvider.endInteraction(withCall: call)
+        }
+        self.delegate?.callManager(self, didEndCall: call, error: nil)
         print("Call ended")
+    }
+}
+
+// MARK: - Call notifications
+private extension CallManager {
+    func reportStartedCall(_ call: Call) {
+        self.palDelegate?.callManager(self, didStartCallWithPal: call.pal)
+        self.delegate?.callManager(self, didStartCall: call)
+    }
+    
+    func reportEstablishedCall(_ call: Call) {
+        call.audioProcessor?.delegate = self
+        delegate?.callManager(self, didEstablishCall: call)
     }
 }
 
@@ -163,7 +191,7 @@ extension CallManager {
 extension CallManager {
     
     func checkForDataToWrite(_ call: Call) {
-        if call.callStatus == .dealing {
+        if call.callStatus == .dialing {
             let success = call.sendCallerInfo(localIdentifier)
             if !success {
                 endCall(call)
@@ -185,8 +213,8 @@ extension CallManager {
         case .presented:
             let success = call.processAnswer()
             if success {
-                call.audioProcessor?.delegate = self
                 interactionProvider.reportOutgoingCall(call: call)
+                reportEstablishedCall(call)
             } else {
                 endCall(call)
             }
@@ -235,6 +263,7 @@ extension CallManager {
                            outputStream: streams.output,
                            asCaller: false)
         interactionProvider.reportIncomingCall(call: currentCall!)
+        reportStartedCall(currentCall!)
     }
 }
 
@@ -390,7 +419,7 @@ extension CallManager {
         }
         //TODO: Add events like close connections if opened
         nearbyPals.remove(at: index)
-        delegate?.callManager(self, didDetectDisconnection: pal)
+        palDelegate?.callManager(self, didDetectDisconnection: pal)
     }
     
     func updatePal(_ pal: NearbyPal, withData data:(username: String, uuid: UUID, status: PalStatus)) {
@@ -402,18 +431,18 @@ extension CallManager {
         
         if oldStatus != pal.status {
             if pal.status == .Available && oldStatus == .NoAvailable {
-                delegate?.callManager(self, didDetectNearbyPal: pal)
+                palDelegate?.callManager(self, didDetectNearbyPal: pal)
             } else if pal.status == .NoAvailable {
                 // I keep the pal, but it isn't available for the client until
                 // it's available again.
-                delegate?.callManager(self, didDetectDisconnection: pal)
+                palDelegate?.callManager(self, didDetectDisconnection: pal)
             } else {
-                delegate?.callManager(self, didPal: pal, changeStatus: pal.status)
+                palDelegate?.callManager(self, didPal: pal, changeStatus: pal.status)
             }
         }
         
         if oldName != nil && oldName != pal.username{
-            delegate?.callManager(self, didPal: pal, changeUsername: pal.username!)
+            palDelegate?.callManager(self, didPal: pal, changeUsername: pal.username!)
         }
         
     }

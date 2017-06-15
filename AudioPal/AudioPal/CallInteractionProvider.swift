@@ -46,7 +46,7 @@ extension CallInteractionProvider {
 
     func startInteraction(withCall call: Call) {
         let handle = CXHandle(type: .generic, value: call.pal.username!)
-        let startCallAction = CXStartCallAction(call: call.pal.uuid!,
+        let startCallAction = CXStartCallAction(call: call.uuid,
                                                 handle: handle)
         startCallAction.isVideo = false
         calls.append(call)
@@ -56,14 +56,14 @@ extension CallInteractionProvider {
     }
     
     func endInteraction(withCall call: Call) {
-        let endCallAction = CXEndCallAction(call: call.pal.uuid!)
+        let endCallAction = CXEndCallAction(call: call.uuid)
         let transaction = CXTransaction()
         transaction.addAction(endCallAction)
         requestTransaction(transaction)
     }
     
     func setHeldInteraction(call: Call, onHold: Bool) {
-        let setHeldCallAction = CXSetHeldCallAction(call: call.pal.uuid!,
+        let setHeldCallAction = CXSetHeldCallAction(call: call.uuid,
                                                     onHold: onHold)
         let transaction = CXTransaction()
         transaction.addAction(setHeldCallAction)
@@ -75,17 +75,17 @@ extension CallInteractionProvider {
         update.remoteHandle = CXHandle(type: .generic, value: call.pal.username!)
         update.hasVideo = false
         calls.append(call)
-        provider.reportNewIncomingCall(with: call.pal.uuid!, update: update) { error in
+        provider.reportNewIncomingCall(with: call.uuid, update: update) { error in
             if error != nil {
-                self.callManager?.endCall(call)
+                self.endCall(call)
             }
             completion?(error as NSError?)
         }
     }
     
     func reportOutgoingCall(call: Call) {
-        provider.reportOutgoingCall(with: call.pal.uuid!, startedConnectingAt: nil)
-        provider.reportOutgoingCall(with: call.pal.uuid!, connectedAt: nil)
+        provider.reportOutgoingCall(with: call.uuid, startedConnectingAt: nil)
+        provider.reportOutgoingCall(with: call.uuid, connectedAt: nil)
     
     }
     
@@ -96,6 +96,13 @@ extension CallInteractionProvider {
             } else {
                 print("Requested transaction successfully")
             }
+        }
+    }
+    
+    fileprivate func endCall(_ call: Call) {
+        call.interactionEnded = true
+        if !call.ended {
+            self.callManager?.endCall(call)
         }
     }
 }
@@ -121,7 +128,7 @@ extension CallInteractionProvider: CXProviderDelegate {
             return
         }
         
-        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
+        guard let call = (calls.filter{ $0.uuid == action.callUUID}.first) else {
             action.fail()
             return
         }
@@ -142,7 +149,7 @@ extension CallInteractionProvider: CXProviderDelegate {
             return
         }
         
-        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
+        guard let call = (calls.filter{ $0.uuid == action.callUUID}.first) else {
             action.fail()
             return
         }
@@ -157,19 +164,12 @@ extension CallInteractionProvider: CXProviderDelegate {
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         
-        guard let callManager = callManager else {
+        guard let call = (calls.filter{ $0.uuid == action.callUUID}.first) else {
             action.fail()
             return
         }
-
-        guard let call = (calls.filter{ $0.pal.uuid == action.callUUID}.first) else {
-            action.fail()
-            return
-        }
-        
-        callManager.endCall(call)
+        endCall(call)
         calls.removeAll()
-        
         action.fulfill()
     }
     
