@@ -20,6 +20,7 @@
 @interface ADProcessor : NSObject
 @property (nonatomic, weak) id<ADProcessorDelegate> delegate;
 @property (nonatomic) BOOL useSpeakers;
+@property (nonatomic) BOOL muted;
 @property (nonatomic, readonly) BOOL isStarted;
 
 - (void)start;

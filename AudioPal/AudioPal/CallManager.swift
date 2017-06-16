@@ -107,7 +107,7 @@ extension CallManager {
 
 extension CallManager {
     
-    public func startCall(toPal pal: NearbyPal) -> Bool {
+    func startCall(toPal pal: NearbyPal) -> Bool {
         if localStatus != .Available {
             return false
         }
@@ -132,7 +132,7 @@ extension CallManager {
         return true
     }
     
-    public func prepareOutgoingCall(_ call: Call) -> Bool {
+    func prepareOutgoingCall(_ call: Call) -> Bool {
         
         if currentCall != call {
             return false
@@ -142,7 +142,7 @@ extension CallManager {
         return true
     }
     
-    public func acceptIncomingCall(_ call: Call) -> Bool{
+    func acceptIncomingCall(_ call: Call) -> Bool{
         if localStatus != .Available {
             return false
         }
@@ -156,7 +156,7 @@ extension CallManager {
         return true
     }
     
-    public func endCall(_ call: Call) {
+    func endCall(_ call: Call) {
         call.stopAudioProcessing()
         closeStreams(forCall: call)
         localStatus = .Available
@@ -170,6 +170,22 @@ extension CallManager {
         }
         self.delegate?.callManager(self, didEndCall: call, error: nil)
         print("Call ended")
+    }
+    
+    func toggleMute() {
+        guard let currentCall = currentCall else {
+            return
+        }
+        currentCall.toggleMute()
+        self.delegate?.callManager(self, didMute: currentCall.isMuted, call: currentCall)
+    }
+    
+    func toggleSpeaker() {
+        guard let currentCall = currentCall else {
+            return
+        }
+        currentCall.toggleSpeaker()
+        self.delegate?.callManager(self, didActivateSpeaker: currentCall.useSpeakers, call: currentCall)
     }
 }
 

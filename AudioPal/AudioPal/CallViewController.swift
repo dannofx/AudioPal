@@ -70,10 +70,6 @@ class CallViewController: UIViewController, CallManagerDelegate {
 }
 
 extension CallViewController {
-    @IBAction func toggleMute(sender: UIButton) {
-        
-    }
-    
     @IBAction func hangUp(sender: UIButton) {
         guard let callManager = callManager else {
             return
@@ -86,8 +82,12 @@ extension CallViewController {
         callManager.endCall(call)
     }
     
+    @IBAction func toggleMute(sender: UIButton) {
+        callManager?.toggleMute()
+    }
+    
     @IBAction func toggleSpeaker(sender: UIButton) {
-        
+        callManager?.toggleSpeaker()
     }
 }
 

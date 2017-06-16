@@ -22,11 +22,25 @@ class Call: NSObject {
     let inputStream: InputStream
     let outputStream: OutputStream
     let uuid: UUID
-    private (set) var callStatus: CallStatus
+    fileprivate (set) var callStatus: CallStatus
     var audioProcessor: ADProcessor?
     var inputBuffer: Data?
     var interactionEnded: Bool // Refers to CallKit UI
     var ended: Bool // Tells if the call was ended (there is no audio nor transmission)
+    var isMuted: Bool {
+        guard let audioProcessor = audioProcessor else {
+            return false
+        }
+        
+        return audioProcessor.muted
+    }
+    var useSpeakers: Bool {
+        guard let audioProcessor = audioProcessor else {
+            return false
+        }
+        
+        return audioProcessor.useSpeakers
+    }
     
     init(pal: NearbyPal, inputStream: InputStream, outputStream: OutputStream, asCaller caller: Bool) {
         self.pal = pal
@@ -42,57 +56,11 @@ class Call: NSObject {
         }
     }
     
-    func prepareForAudioProcessing() {
-        if audioProcessor != nil {
-            return
-        }
-        audioProcessor = ADProcessor()
-    }
-    
-    func startAudioProcessing() {
-        
-//        if (audioProcessor != nil) && !(audioProcessor!.isStarted)  {
-//            return
-//        }
+}
 
-        inputBuffer = Data()
-        audioProcessor?.start()
-    }
-    
-    func stopAudioProcessing() {
-        if audioProcessor == nil {
-            return
-        }
-        inputBuffer = nil;
-        audioProcessor?.stop()
-        audioProcessor = nil
-    }
-    
-    func writeToOutputBuffer(data: Data) -> Bool {
-        let nsData = data as NSData
-        if outputStream.hasSpaceAvailable {
-            outputStream.write(nsData.bytes.assumingMemoryBound(to: UInt8.self),
-                                    maxLength: nsData.length)
-            return true
-        } else {
-            return false
-        }
-    }
-    
-    func readInputBuffer() -> Data? {
-        return type(of: self).readInputStream(inputStream)
-    }
-    
-    class func readInputStream(_ inputStream: InputStream) -> Data?{
-        var bytes = [UInt8](repeating: 0, count: maxBufferSize)
-        let bytesRead = inputStream.read(&bytes, maxLength: maxBufferSize)
-        if bytesRead < 1 {
-            print("Problem reading buffer")
-            return nil
-        }
-        return Data(bytes: bytes, count: bytesRead)
-    }
-    
+// MARK: - Call management
+
+extension Call {
     func sendCallerInfo(_ uuid: UUID) -> Bool{
         let uuidData = uuid.data
         let success = writeToOutputBuffer(data: uuidData)
@@ -131,6 +99,37 @@ class Call: NSObject {
         
         return false
     }
+}
+
+// MARK: - Audio management
+
+extension Call {
+    
+    func prepareForAudioProcessing() {
+        if audioProcessor != nil {
+            return
+        }
+        audioProcessor = ADProcessor()
+    }
+    
+    func startAudioProcessing() {
+        
+        if (audioProcessor == nil) || audioProcessor!.isStarted  {
+            return
+        }
+        
+        inputBuffer = Data()
+        audioProcessor?.start()
+    }
+    
+    func stopAudioProcessing() {
+        if audioProcessor == nil {
+            return
+        }
+        inputBuffer = nil;
+        audioProcessor?.stop()
+        audioProcessor = nil
+    }
     
     func scheduleDataToPlay(_ data: Data) {
         if inputBuffer == nil {
@@ -144,7 +143,47 @@ class Call: NSObject {
         }
     }
     
-    private func extractAvailableInputBuffers() -> [Data] {
+    func toggleMute() {
+        let mute = !isMuted
+        audioProcessor?.muted = mute
+    }
+    
+    func toggleSpeaker() {
+        let speakers = !useSpeakers
+        audioProcessor?.useSpeakers = speakers
+    }
+}
+
+// MARK: - Data management
+
+extension Call {
+    
+    func writeToOutputBuffer(data: Data) -> Bool {
+        let nsData = data as NSData
+        if outputStream.hasSpaceAvailable {
+            outputStream.write(nsData.bytes.assumingMemoryBound(to: UInt8.self),
+                               maxLength: nsData.length)
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func readInputBuffer() -> Data? {
+        return type(of: self).readInputStream(inputStream)
+    }
+    
+    class func readInputStream(_ inputStream: InputStream) -> Data?{
+        var bytes = [UInt8](repeating: 0, count: maxBufferSize)
+        let bytesRead = inputStream.read(&bytes, maxLength: maxBufferSize)
+        if bytesRead < 1 {
+            print("Problem reading buffer")
+            return nil
+        }
+        return Data(bytes: bytes, count: bytesRead)
+    }
+    
+    func extractAvailableInputBuffers() -> [Data] {
         
         var completeBuffers = [Data]()
         while inputBuffer!.count > 0 {
@@ -184,5 +223,4 @@ class Call: NSObject {
         fullBuffer.append(buffer)
         return fullBuffer
     }
-    
 }

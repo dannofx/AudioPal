@@ -53,6 +53,7 @@ static UInt32 const m_encBitrate = 32000;
         m_decoder = nil;
         _useSpeakers = NO;
         _isStarted = NO;
+        _muted = NO;
         receivedBuffersQueue = dispatch_queue_create("audiopal.adprocessor", DISPATCH_QUEUE_SERIAL);
         
         [self initializeAudioUnit];
@@ -87,19 +88,20 @@ static UInt32 const m_encBitrate = 32000;
     //Set properties for audio session
     AVAudioSession * session = [AVAudioSession sharedInstance];
     NSError * sError = nil;
-    [session setCategory:AVAudioSessionCategoryPlayAndRecord error:&sError];
+    [session setCategory:AVAudioSessionCategoryPlayAndRecord
+             withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker error: &sError];
     [self printErrorIfNecessary:sError];
-    if (self.useSpeakers)
-    {
-        //TODO: Vamos a tener que hacer esto para poner speaker siempre? (pasar por aquí)
-        [session overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&sError];
-        [self printErrorIfNecessary:sError];
-    }
+    [session setMode:AVAudioSessionModeVoiceChat error:&sError];
+    [self printErrorIfNecessary:sError];
     Float32 preferredBufferTime = ((Float32)m_frameSize) / ((Float64)m_sampleRate);
     [session setPreferredIOBufferDuration:preferredBufferTime error:&sError];
     [self printErrorIfNecessary:sError];
-    //[session setActive:YES error:&sError];
-    //[self printErrorIfNecessary:sError];
+    if (session.inputGainSettable) {
+        [session setInputGain:1.0 error:&sError];
+    }
+    [self printErrorIfNecessary:sError];
+    [session setActive:YES error:&sError];
+    [self printErrorIfNecessary:sError];
     
     //Initialize buffers
     m_inputByteSize  = m_frameSize * m_inChannels  * sizeof(SInt32);
@@ -109,7 +111,6 @@ static UInt32 const m_encBitrate = 32000;
     m_outputBuffer.mNumberChannels = m_outChannels;
     m_outputBuffer.mDataByteSize   = m_outputByteSize;
     
-    //TODO: falta liberar, es necesario?
     //Allocate memory for buffers
     m_inputBuffer.mData = malloc(sizeof(unsigned char)*m_inputByteSize);
     memset(m_inputBuffer.mData, 0, m_inputByteSize);
@@ -119,7 +120,7 @@ static UInt32 const m_encBitrate = 32000;
     //Retrieve audio component
     AudioComponentDescription compDesc;
     compDesc.componentType = kAudioUnitType_Output;
-    compDesc.componentSubType = kAudioUnitSubType_RemoteIO;
+    compDesc.componentSubType = kAudioUnitSubType_VoiceProcessingIO;
     compDesc.componentManufacturer = kAudioUnitManufacturer_Apple;
     compDesc.componentFlags = 0;
     compDesc.componentFlagsMask = 0;
@@ -127,7 +128,6 @@ static UInt32 const m_encBitrate = 32000;
     AudioComponentInstanceNew(component, &m_audioComponent);
     
     //Enable audio input
-    //TODO: Se puede deshabilitar microfono a este nivel?
     UInt32 enableInput = 1;
     AudioUnitSetProperty(m_audioComponent,
                          kAudioOutputUnitProperty_EnableIO,
@@ -206,6 +206,7 @@ static UInt32 const m_encBitrate = 32000;
     _isStarted = YES;
     receivedBuffers = [[NSMutableArray alloc] init];
     audioOutputClean = YES;
+    
     AudioUnitInitialize(m_audioComponent);
     AudioOutputUnitStart(m_audioComponent);
     
@@ -222,6 +223,38 @@ static UInt32 const m_encBitrate = 32000;
     //stop audiounits
     AudioOutputUnitStop(m_audioComponent);
     AudioComponentInstanceDispose(m_audioComponent);
+}
+
+- (void)setMuted:(BOOL)muted {
+    if (_muted == muted) {
+        return;
+    }
+    _muted = muted;
+    UInt32 enableInput = muted ? 0 : 1;
+    AudioOutputUnitStop(m_audioComponent);
+    AudioUnitUninitialize(m_audioComponent);
+    AudioUnitSetProperty(m_audioComponent,
+                         kAudioOutputUnitProperty_EnableIO,
+                         kAudioUnitScope_Input,
+                         m_inputElement,
+                         &enableInput,
+                         sizeof(enableInput));
+    AudioUnitInitialize(m_audioComponent);
+    AudioOutputUnitStart(m_audioComponent);
+}
+
+- (void)setUseSpeakers:(BOOL)useSpeakers {
+    if (_useSpeakers == useSpeakers) {
+        return;
+    }
+    _useSpeakers = useSpeakers;
+    
+    AVAudioSessionPortOverride port = useSpeakers ? AVAudioSessionPortOverrideSpeaker : AVAudioSessionPortOverrideNone;
+    AVAudioSession * session = [AVAudioSession sharedInstance];
+    NSError * error = nil;
+    [session overrideOutputAudioPort:port error:&error];
+    [self printErrorIfNecessary:error];
+    
 }
 
 - (void)scheduleBufferToPlay:(NSData *)buffer {
@@ -374,6 +407,8 @@ static OSStatus audioOutputCallback(void *inRefCon,
 - (void)dealloc {
     m_encoder = nil;
     m_decoder = nil;
+    free(m_inputBuffer.mData);
+    free(m_outputBuffer.mData);
 }
 
 @end
