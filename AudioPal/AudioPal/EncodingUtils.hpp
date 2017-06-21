@@ -38,7 +38,6 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-//TODO: Verificar si esto es necesario.
 void EUFillOutASBDForLPCM(AudioStreamBasicDescription * outASBD,
                                  Float64 inSampleRate,
                                  UInt32 inChannelsPerFrame,

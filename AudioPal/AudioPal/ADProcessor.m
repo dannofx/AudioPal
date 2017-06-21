@@ -84,12 +84,10 @@ static UInt32 const m_encBitrate = 32000;
 }
 
 - (void)initializeAudioUnit {
-    
     //Set properties for audio session
     AVAudioSession * session = [AVAudioSession sharedInstance];
     NSError * sError = nil;
-    [session setCategory:AVAudioSessionCategoryPlayAndRecord
-             withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker error: &sError];
+    [session setCategory:AVAudioSessionCategoryPlayAndRecord error: &sError];
     [self printErrorIfNecessary:sError];
     [session setMode:AVAudioSessionModeVoiceChat error:&sError];
     [self printErrorIfNecessary:sError];
