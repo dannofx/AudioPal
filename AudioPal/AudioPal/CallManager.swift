@@ -37,6 +37,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
     var nearbyPals: [NearbyPal]!
+    let serialQueue: DispatchQueue!
     let interactionProvider: CallInteractionProvider
     weak var palDelegate: PalConnectionDelegate?
     weak var delegate: CallManagerDelegate?
@@ -59,6 +60,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         interactionProvider = CallInteractionProvider()
         acceptedStreams = []
         nearbyPals = []
+        serialQueue = DispatchQueue(label: "audiopal.callqueue", attributes: .concurrent)
         super.init()
         interactionProvider.callManager = self
     }
@@ -228,17 +230,21 @@ extension CallManager {
         switch call.callStatus {
         case .presented:
             let success = call.processAnswer()
-            if success {
-                interactionProvider.reportOutgoingCall(call: call)
-                reportEstablishedCall(call)
-            } else {
-                endCall(call)
+            DispatchQueue.main.async {
+                if success {
+                    self.interactionProvider.reportOutgoingCall(call: call)
+                    self.reportEstablishedCall(call)
+                } else {
+                    self.endCall(call)
+                }
             }
         case .onCall:
             guard let data = call.readInputBuffer() else {
                 return
             }
-            call.scheduleDataToPlay(data)
+            DispatchQueue.main.async {
+                call.scheduleDataToPlay(data)
+            }
         default:
             break
         }
@@ -274,12 +280,13 @@ extension CallManager {
         }
         
         acceptedStreams.removeAll()
-        
-        currentCall = Call(pal: pal, inputStream: streams.input,
-                           outputStream: streams.output,
-                           asCaller: false)
-        interactionProvider.reportIncomingCall(call: currentCall!)
-        reportStartedCall(currentCall!)
+        DispatchQueue.main.async {
+            self.currentCall = Call(pal: pal, inputStream: streams.input,
+                                   outputStream: streams.output,
+                                   asCaller: false)
+            self.interactionProvider.reportIncomingCall(call: self.currentCall!)
+            self.reportStartedCall(self.currentCall!)
+        }
     }
 }
 
@@ -292,13 +299,19 @@ private extension CallManager {
     }
     
     func openStreams(inputStream: InputStream, outputStream: OutputStream) {
-        outputStream.delegate = self
-        outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-        outputStream.open()
         
-        inputStream.delegate = self
-        inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-        inputStream.open()
+        serialQueue.async {
+            outputStream.delegate = self
+            outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+            outputStream.open()
+            
+            inputStream.delegate = self
+            inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+            inputStream.open()
+            
+            RunLoop.current.run()
+        }
+
     }
     
     func closeStreams(forCall call: Call) {
@@ -307,11 +320,15 @@ private extension CallManager {
     }
     
     func closeStreams(inputStream: InputStream, outputStream: OutputStream) {
-        outputStream.delegate = nil
-        outputStream.close()
-        
-        inputStream.delegate = nil
-        inputStream.close()
+        serialQueue.async {
+            outputStream.delegate = nil
+            outputStream.close()
+            outputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+            
+            inputStream.delegate = nil
+            inputStream.close()
+            inputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        }
     }
 }
 
@@ -548,7 +565,7 @@ extension CallManager {
     }
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
-        print("Name \(service.name)")
+        print("Service name \(service.name)")
         let validService = service != localService &&
             service.baseName != "" &&
             service.baseName == baseServiceName
@@ -599,31 +616,33 @@ extension CallManager {
 extension CallManager {
     
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
-        
         switch eventCode {
-        case Stream.Event.openCompleted:
-            print("Completed")
-        case Stream.Event.hasSpaceAvailable:
-            if currentCall?.outputStream == aStream {
-                checkForDataToWrite(currentCall!)
+            case Stream.Event.openCompleted:
+                print("Completed")
+            case Stream.Event.hasSpaceAvailable:
+                if currentCall?.outputStream == aStream {
+                    checkForDataToWrite(currentCall!)
+                }
+            case Stream.Event.hasBytesAvailable:
+                self.readInputData(aStream as! InputStream)
+            case Stream.Event.errorOccurred:
+                print("Error")
+                if let call = currentCall {
+                    DispatchQueue.main.async {
+                        self.endCall(call)
+                    }
+                }
+            case Stream.Event.endEncountered:
+                print("End encountered")
+                if let call = currentCall {
+                    DispatchQueue.main.async {
+                        self.endCall(call)
+                    }
+                }
+            default:
+                print("Not handled stream event")
             }
-        case Stream.Event.hasBytesAvailable:
-            readInputData(aStream as! InputStream)
-        case Stream.Event.errorOccurred:
-            print("Error")
-            if let call = currentCall {
-                self.endCall(call)
-            }
-        case Stream.Event.endEncountered:
-            print("End encountered")
-            if let call = currentCall {
-                self.endCall(call)
-            }
-        default:
-            print("default")
         }
-        
-    }
 }
 
 // MARK: - ADProcessorDelegate
@@ -635,9 +654,11 @@ extension CallManager {
         guard let call = currentCall else {
             return
         }
-        
+
         let preparedBuffer = call.prepareOutputAudioBuffer(buffer)
-        _ = call.writeToOutputBuffer(data: preparedBuffer)
+        serialQueue.async {
+            _ = call.writeToOutputBuffer(data: preparedBuffer)
+        }
     }
     
     public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
