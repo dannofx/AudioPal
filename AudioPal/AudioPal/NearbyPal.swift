@@ -19,7 +19,7 @@ class NearbyPal: NSObject {
     var uuid: UUID?
     var username: String?
     var status: PalStatus
-    let service: NetService!
+    var service: NetService!
     
     init(_ service: NetService) {
         self.service = service

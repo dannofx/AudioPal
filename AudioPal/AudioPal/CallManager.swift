@@ -603,17 +603,24 @@ extension CallManager {
             return
         }
         print("It's a valid service \(service.name)")
+        var newPal = true
         if getPalWithService(service) == nil{
             
-            let existingPal = getPalWithUUID(service.uuid!)
-            if existingPal != nil {
+            if let existingPal = getPalWithUUID(service.uuid!) {
                 // Just the newer version of the service will remain
-                if existingPal!.service.version < service.version {
-                    removePal(existingPal!)
+                if existingPal.service.version < service.version {
+                    existingPal.service = service
+                    newPal = false
                 } else {
                     return
                 }
             }
+            
+//            var uuid: UUID?
+//            var username: String?
+//            var status: PalStatus
+//            var service: NetService!
+            
             service.delegate = self
             service.resolve(withTimeout: 5.0)
             let currentQueue = OperationQueue.current?.underlyingQueue
@@ -623,7 +630,9 @@ extension CallManager {
             }
             print("Another service found \(service.name)")
             
-            _ = addPal(withService: service)
+            if newPal {
+                _ = addPal(withService: service)
+            }
         }
     }
     
@@ -656,11 +665,11 @@ extension CallManager {
                 self.readInputData(aStream as! InputStream)
             case Stream.Event.errorOccurred:
                 print("Error")
-                if let call = currentCall {
-                    DispatchQueue.main.async {
-                        self.endCall(call)
-                    }
-                }
+//                if let call = currentCall {
+//                    DispatchQueue.main.async {
+//                        self.endCall(call)
+//                    }
+//                }
             case Stream.Event.endEncountered:
                 print("End encountered")
                 if let call = currentCall {

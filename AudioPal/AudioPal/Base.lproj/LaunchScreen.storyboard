@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina4_7" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina3_5" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -19,21 +18,45 @@
                         <viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="AudioPal" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Afn-dF-JXw">
-                                <rect key="frame" x="36" y="305.5" width="303" height="56.5"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="47"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="60O-Mf-YNp">
+                                <rect key="frame" x="58" y="152.5" width="204" height="135"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="mainIcon" translatesAutoresizingMaskIntoConstraints="NO" id="3Ev-TG-qwP">
+                                        <rect key="frame" x="65" y="0.0" width="74" height="91"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="91" id="33x-DR-fmq"/>
+                                            <constraint firstAttribute="width" constant="74" id="sV6-rm-FcD"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="AudioPal" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Afn-dF-JXw">
+                                        <rect key="frame" x="0.0" y="100" width="204" height="35"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="35" id="11X-NC-eAe"/>
+                                            <constraint firstAttribute="width" constant="204" id="2Yg-sp-dop"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="30"/>
+                                        <color key="textColor" red="0.99989169840000003" green="1" blue="0.99988096950000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="Afn-dF-JXw" firstAttribute="centerX" secondItem="60O-Mf-YNp" secondAttribute="centerX" id="7Oi-kK-iDg"/>
+                                    <constraint firstAttribute="bottom" secondItem="Afn-dF-JXw" secondAttribute="bottom" id="KbM-CD-6Uv"/>
+                                    <constraint firstItem="3Ev-TG-qwP" firstAttribute="centerX" secondItem="60O-Mf-YNp" secondAttribute="centerX" id="NPg-Fm-Uf0"/>
+                                    <constraint firstItem="3Ev-TG-qwP" firstAttribute="top" secondItem="60O-Mf-YNp" secondAttribute="top" id="UmL-wH-Amo"/>
+                                    <constraint firstItem="Afn-dF-JXw" firstAttribute="top" secondItem="3Ev-TG-qwP" secondAttribute="bottom" constant="9" id="h69-yM-W1D"/>
+                                    <constraint firstItem="Afn-dF-JXw" firstAttribute="leading" secondItem="60O-Mf-YNp" secondAttribute="leading" id="rks-Ih-OBb"/>
+                                </constraints>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.064742118120193481" green="0.35698971152305603" blue="0.38703933358192444" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="Afn-dF-JXw" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="20" id="1RG-ph-gP2"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="Afn-dF-JXw" secondAttribute="trailing" constant="20" id="c6k-le-Kx5"/>
-                            <constraint firstItem="Afn-dF-JXw" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="xO7-Rh-TVB"/>
+                            <constraint firstItem="60O-Mf-YNp" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-20" id="j7P-O5-LRL"/>
+                            <constraint firstItem="60O-Mf-YNp" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="oQp-Pg-91y"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -42,4 +65,7 @@
             <point key="canvasLocation" x="52" y="374.66266866566718"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="mainIcon" width="74" height="91"/>
+    </resources>
 </document>

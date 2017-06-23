@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Key-nW-CqE">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Key-nW-CqE">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -130,21 +129,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Set name:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BJn-tX-71b">
-                                <rect key="frame" x="57" y="66" width="77" height="21"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="21" id="BoT-2h-FiC"/>
-                                    <constraint firstAttribute="width" constant="77" id="yRZ-iq-zz0"/>
-                                </constraints>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Set name:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BJn-tX-71b">
+                                <rect key="frame" x="57" y="231" width="77" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wma-x0-VQQ">
-                                <rect key="frame" x="57" y="95" width="274" height="30"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="SWD-8s-AD0"/>
-                                </constraints>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wma-x0-VQQ">
+                                <rect key="frame" x="57" y="260" width="274" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
@@ -152,29 +146,48 @@
                                     <action selector="didChangeTextWithSender:" destination="IoN-AA-W5E" eventType="editingChanged" id="I4g-Yo-OJz"/>
                                 </connections>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H9C-If-cq9">
-                                <rect key="frame" x="57" y="220" width="274" height="58"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H9C-If-cq9">
+                                <rect key="frame" x="57" y="385" width="274" height="58"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.92941176469999998" green="0.87550793339999999" blue="0.93330148670000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="58" id="5EH-1b-IPQ"/>
-                                </constraints>
                                 <state key="normal" title="Start"/>
                                 <connections>
                                     <action selector="startAppWithSender:" destination="IoN-AA-W5E" eventType="touchUpInside" id="Smu-nY-3vc"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HgU-HJ-xpn">
+                                <rect key="frame" x="92" y="58" width="204" height="135"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="mainIcon" translatesAutoresizingMaskIntoConstraints="NO" id="d1g-LJ-EaB">
+                                        <rect key="frame" x="65" y="0.0" width="74" height="91"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="91" id="Yr4-W8-1uB"/>
+                                            <constraint firstAttribute="width" constant="74" id="pdd-g3-JFI"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="AudioPal" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hXz-pj-xqf">
+                                        <rect key="frame" x="0.0" y="100" width="204" height="35"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="35" id="0Dw-xC-lA9"/>
+                                            <constraint firstAttribute="width" constant="204" id="TTV-jC-TnE"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="30"/>
+                                        <color key="textColor" red="0.99989169840000003" green="1" blue="0.99988096950000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="d1g-LJ-EaB" firstAttribute="centerX" secondItem="HgU-HJ-xpn" secondAttribute="centerX" id="Ab5-8c-zsG"/>
+                                    <constraint firstItem="hXz-pj-xqf" firstAttribute="centerX" secondItem="HgU-HJ-xpn" secondAttribute="centerX" id="S6R-U8-qhT"/>
+                                    <constraint firstItem="hXz-pj-xqf" firstAttribute="top" secondItem="d1g-LJ-EaB" secondAttribute="bottom" constant="9" id="SZ3-zK-lZo"/>
+                                    <constraint firstItem="hXz-pj-xqf" firstAttribute="leading" secondItem="HgU-HJ-xpn" secondAttribute="leading" id="kfl-5Q-ij1"/>
+                                    <constraint firstItem="d1g-LJ-EaB" firstAttribute="top" secondItem="HgU-HJ-xpn" secondAttribute="top" id="sG8-wD-VSE"/>
+                                    <constraint firstAttribute="bottom" secondItem="hXz-pj-xqf" secondAttribute="bottom" id="xJP-VD-02C"/>
+                                </constraints>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="H9C-If-cq9" firstAttribute="leading" secondItem="Sfd-ya-c5N" secondAttribute="leadingMargin" constant="41" id="FHJ-eb-WIM"/>
-                            <constraint firstItem="BJn-tX-71b" firstAttribute="leading" secondItem="Sfd-ya-c5N" secondAttribute="leadingMargin" constant="41" id="NLg-Yk-NdJ"/>
-                            <constraint firstItem="wma-x0-VQQ" firstAttribute="top" secondItem="BJn-tX-71b" secondAttribute="bottom" constant="8" id="R3F-zX-2Me"/>
-                            <constraint firstItem="H9C-If-cq9" firstAttribute="top" secondItem="wma-x0-VQQ" secondAttribute="bottom" constant="95" id="Rtv-fY-oa6"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="wma-x0-VQQ" secondAttribute="trailing" constant="28" id="bbS-6s-a0A"/>
-                            <constraint firstItem="wma-x0-VQQ" firstAttribute="leading" secondItem="Sfd-ya-c5N" secondAttribute="leadingMargin" constant="41" id="gDE-CF-uG7"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="H9C-If-cq9" secondAttribute="trailing" constant="28" id="gUT-BX-K34"/>
-                            <constraint firstItem="BJn-tX-71b" firstAttribute="top" secondItem="lJL-D3-kYx" secondAttribute="bottom" constant="46" id="orp-vM-j3N"/>
-                        </constraints>
+                        <color key="backgroundColor" red="0.064742118119999997" green="0.35698971149999997" blue="0.38703933359999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
                         <outlet property="nameTextField" destination="wma-x0-VQQ" id="rxL-vX-xWl"/>
@@ -189,9 +202,14 @@
         <scene sceneID="qVP-6L-8xe">
             <objects>
                 <navigationController id="Key-nW-CqE" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="EL0-Fd-VDO">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="EL0-Fd-VDO">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.064742118119999997" green="0.35698971149999997" blue="0.38703933359999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </textAttributes>
                     </navigationBar>
                     <connections>
                         <segue destination="uMo-1u-40M" kind="relationship" relationship="rootViewController" id="7jL-KS-Beh"/>
@@ -203,4 +221,7 @@
             <point key="canvasLocation" x="-15" y="127"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="mainIcon" width="74" height="91"/>
+    </resources>
 </document>
