@@ -22,6 +22,7 @@
 		5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */; };
 		519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D696E1ED3EC6B00271B2C /* CallManager.swift */; };
 		519D69711ED3EFEC00271B2C /* NearbyPal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D69701ED3EFEC00271B2C /* NearbyPal.swift */; };
+		51B44C801EFCC48C0041656E /* UIColor+UNTAdditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B44C7F1EFCC48C0041656E /* UIColor+UNTAdditions.swift */; };
 		51B813EA1EF19C38007CA2EA /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B813E91EF19C38007CA2EA /* CallViewController.swift */; };
 		51C8EAE41EDFDA9B0029271C /* ADProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADD1EDFDA9B0029271C /* ADProcessor.m */; };
 		51C8EAE51EDFDA9B0029271C /* AACELDDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */; };
@@ -59,6 +60,7 @@
 		5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetNameViewController.swift; sourceTree = "<group>"; };
 		519D696E1ED3EC6B00271B2C /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		519D69701ED3EFEC00271B2C /* NearbyPal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyPal.swift; sourceTree = "<group>"; };
+		51B44C7F1EFCC48C0041656E /* UIColor+UNTAdditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+UNTAdditions.swift"; sourceTree = "<group>"; };
 		51B813E91EF19C38007CA2EA /* CallViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
 		51C8EADB1EDFDA9A0029271C /* AudioPal-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AudioPal-Bridging-Header.h"; sourceTree = "<group>"; };
 		51C8EADC1EDFDA9B0029271C /* ADProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ADProcessor.h; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				5156E0691EDE71730036E45F /* PalTableViewCell.swift */,
 				513880441EE12645008150BC /* UUID+Utils.swift */,
 				5156E06B1EDE8FA30036E45F /* NetService+Utils.swift */,
+				51B44C7F1EFCC48C0041656E /* UIColor+UNTAdditions.swift */,
 			);
 			path = AudioPal;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 				5175FCD91ECEA1B300A28166 /* PalsTableViewController.swift in Sources */,
 				5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */,
 				5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */,
+				51B44C801EFCC48C0041656E /* UIColor+UNTAdditions.swift in Sources */,
 				513880451EE12645008150BC /* UUID+Utils.swift in Sources */,
 				513880431EE1260A008150BC /* Call.swift in Sources */,
 				5131CFEE1EE905C6006E99DC /* CallInteractionProvider.swift in Sources */,

@@ -37,7 +37,8 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
     var nearbyPals: [NearbyPal]!
-    let serialQueue: DispatchQueue!
+    let streamQueue: DispatchQueue
+    var streamThread: Thread?
     let interactionProvider: CallInteractionProvider
     weak var palDelegate: PalConnectionDelegate?
     weak var delegate: CallManagerDelegate?
@@ -60,7 +61,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         interactionProvider = CallInteractionProvider()
         acceptedStreams = []
         nearbyPals = []
-        serialQueue = DispatchQueue(label: "audiopal.callqueue", attributes: .concurrent)
+        streamQueue = DispatchQueue(label: "audiopal.callqueue", attributes: .concurrent)
         super.init()
         interactionProvider.callManager = self
     }
@@ -91,17 +92,27 @@ extension CallManager {
     }
     
     public func start() {
+        streamQueue.async {
+            self.streamThread = Thread.current
+            RunLoop.current.add(Port(), forMode: RunLoopMode.defaultRunLoopMode)// Nasty hack to keep the runloop alive :S
+            RunLoop.current.run()
+        }
         setupService()
-        
-        // Integrar CallKit
-        // Agregar features de mute, sin sonido y altavoz
-        // Revisar que pasa si se conectan audifonos
-        // Revisar desconexiones.
         
     }
     
     public func stop() {
+        if let streamThread = streamThread {
+            self.perform(#selector(stopRunLoop), on: streamThread, with: nil, waitUntilDone: true)
+        }
+        streamThread = nil
+        localService.stop()
+        localService.delegate = nil
+        localService = nil
         
+        serviceBrowser.stop()
+        serviceBrowser.delegate = nil
+        serviceBrowser = nil
     }
 }
 
@@ -299,19 +310,11 @@ private extension CallManager {
     }
     
     func openStreams(inputStream: InputStream, outputStream: OutputStream) {
-        
-        serialQueue.async {
-            outputStream.delegate = self
-            outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-            outputStream.open()
-            
-            inputStream.delegate = self
-            inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-            inputStream.open()
-            
-            RunLoop.current.run()
+        guard let streamThread = streamThread else {
+            return
         }
-
+        self.perform(#selector(openStream(_:)), on: streamThread, with: inputStream, waitUntilDone: false)
+        self.perform(#selector(openStream(_:)), on: streamThread, with: outputStream, waitUntilDone: false)
     }
     
     func closeStreams(forCall call: Call) {
@@ -320,15 +323,41 @@ private extension CallManager {
     }
     
     func closeStreams(inputStream: InputStream, outputStream: OutputStream) {
-        serialQueue.async {
-            outputStream.delegate = nil
-            outputStream.close()
-            outputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-            
-            inputStream.delegate = nil
-            inputStream.close()
-            inputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        guard let streamThread = streamThread else {
+            return
         }
+        self.perform(#selector(closeStream(_:)), on: streamThread, with: inputStream, waitUntilDone: false)
+        self.perform(#selector(closeStream(_:)), on: streamThread, with: outputStream, waitUntilDone: false)
+    }
+}
+
+// MARK: - Runloop stream operations
+
+private extension CallManager {
+    
+    @objc func openStream(_ stream: Stream) {
+        stream.delegate = self
+        stream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        stream.open()
+    }
+    
+    @objc func closeStream(_ stream: Stream) {
+        stream.delegate = nil
+        stream.close()
+        stream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+    }
+    
+    @objc func writeToCurrentCall(_ buffer: Data) {
+        guard let call = currentCall else {
+            return
+        }
+        
+        let preparedBuffer = call.prepareOutputAudioBuffer(buffer)
+        _ = call.writeToOutputBuffer(data: preparedBuffer)
+    }
+    
+    @objc func stopRunLoop() {
+        CFRunLoopStop(RunLoop.current as! CFRunLoop)
     }
 }
 
@@ -650,15 +679,10 @@ extension CallManager {
 extension CallManager {
     
     public func processor(_ processor: ADProcessor!, didReceiveRecordedBuffer buffer: Data!) {
-        
-        guard let call = currentCall else {
+        guard let streamThread = streamThread else {
             return
         }
-
-        let preparedBuffer = call.prepareOutputAudioBuffer(buffer)
-        serialQueue.async {
-            _ = call.writeToOutputBuffer(data: preparedBuffer)
-        }
+        self.perform(#selector(writeToCurrentCall(_:)), on: streamThread, with: buffer, waitUntilDone: false)
     }
     
     public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
