@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="310"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sadface" translatesAutoresizingMaskIntoConstraints="NO" id="Ow0-uz-u1G">
+                    <rect key="frame" x="126" y="41" width="67" height="68"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="68" id="Jx5-1e-8ZB"/>
+                        <constraint firstAttribute="width" constant="67" id="dMc-R2-TpO"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No available users were detected near you at the moment." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PKx-vW-crg">
+                    <rect key="frame" x="20" y="132" width="280" height="38.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="textColor" red="0.39995324609999999" green="0.40002685789999998" blue="0.39994865660000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Don't forget to activate Bluetooth and/or WiFi of your device." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XDA-ED-WeJ">
+                    <rect key="frame" x="20" y="190.5" width="280" height="38.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="textColor" red="0.39995324609999999" green="0.40002685789999998" blue="0.39994865660000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your friends need to open the app to become available." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dOj-jA-AgU">
+                    <rect key="frame" x="20" y="249" width="280" height="38.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="textColor" red="0.39995324609999999" green="0.40002685789999998" blue="0.39994865660000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="Ow0-uz-u1G" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="ALb-PV-koI"/>
+                <constraint firstItem="XDA-ED-WeJ" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="CEg-ov-LOW"/>
+                <constraint firstItem="dOj-jA-AgU" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="Eid-ME-c1s"/>
+                <constraint firstItem="PKx-vW-crg" firstAttribute="top" secondItem="Ow0-uz-u1G" secondAttribute="bottom" constant="23" id="RR3-a8-9Pn"/>
+                <constraint firstAttribute="trailing" secondItem="dOj-jA-AgU" secondAttribute="trailing" constant="20" id="Vgf-Ps-n6b"/>
+                <constraint firstItem="Ow0-uz-u1G" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="41" id="hZ0-d5-Zd8"/>
+                <constraint firstAttribute="trailing" secondItem="XDA-ED-WeJ" secondAttribute="trailing" constant="20" id="mAc-ic-hlR"/>
+                <constraint firstItem="dOj-jA-AgU" firstAttribute="top" secondItem="XDA-ED-WeJ" secondAttribute="bottom" constant="20" id="orw-Rf-6xT"/>
+                <constraint firstItem="XDA-ED-WeJ" firstAttribute="top" secondItem="PKx-vW-crg" secondAttribute="bottom" constant="20" id="tyj-mD-KE3"/>
+                <constraint firstAttribute="trailing" secondItem="PKx-vW-crg" secondAttribute="trailing" constant="20" id="xh4-li-Gul"/>
+                <constraint firstItem="PKx-vW-crg" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="xzc-44-qpX"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="33.5" y="-124"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="sadface" width="67" height="68"/>
+    </resources>
+</document>

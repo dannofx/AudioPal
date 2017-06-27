@@ -36,7 +36,13 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let navigationBar = navigationController?.navigationBar {
+            let backgroundImage = UIImage.imageWithColor(color: .untBlueGreen, height: navigationBar.frame.height + 20.0)
+            navigationBar.setBackgroundImage(backgroundImage, for: .default)
+            navigationBar.shadowImage = UIImage.imageWithColor(color: .untMustardYellow, height: 6.0)
+        }
         registerForNotifications()
+        checkForNoPalsView()
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -61,6 +67,17 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
     func startCallManager() {
         callManager.palDelegate = self
         callManager.start()
+    }
+    
+    func checkForNoPalsView() {
+        if connectedPals.count == 0 {
+            let emptyView = Bundle.main.loadNibNamed("EmptyTable", owner: self, options: nil)!.first as! UIView
+            tableView.tableHeaderView = emptyView
+            tableView.separatorColor = UIColor.clear
+        } else {
+            tableView.tableHeaderView = nil
+            tableView.separatorColor = UIColor.untLightYellow
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -115,6 +132,7 @@ extension PalsTableViewController {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
     }
+    
 }
 
 // MARK: - Table view delegate
@@ -136,6 +154,7 @@ extension PalsTableViewController {
         tableView.beginUpdates()
         let indexPath = IndexPath.init(row: connectedPals.count, section: 0)
         connectedPals.append(pal)
+        checkForNoPalsView()
         tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
     }
@@ -148,6 +167,7 @@ extension PalsTableViewController {
         tableView.beginUpdates()
         let indexPath = IndexPath.init(row: index, section: 0)
         connectedPals.remove(at: index)
+        checkForNoPalsView()
         tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
     }
