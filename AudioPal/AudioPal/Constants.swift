@@ -18,6 +18,7 @@ struct StoredValues {
 
 struct NotificationNames {
     static let userReady = "userReady"
+    static let micAccessRequired = "micAccessRequired"
 }
 
 struct PacketKeys {

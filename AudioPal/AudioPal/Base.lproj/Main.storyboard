@@ -45,7 +45,11 @@
                             <outlet property="delegate" destination="uMo-1u-40M" id="hSN-E4-428"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Available Users" id="eXe-SV-foD"/>
+                    <navigationItem key="navigationItem" title="Available Users" id="eXe-SV-foD">
+                        <barButtonItem key="rightBarButtonItem" image="settings" id="hbD-LL-5na">
+                            <color key="tintColor" red="0.98633545639999998" green="0.92029303309999999" blue="0.73148912190000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="gpO-9X-0iH" kind="presentation" identifier="showCall" id="uyS-6Z-gjn"/>
                     </connections>
@@ -259,5 +263,6 @@
     </scenes>
     <resources>
         <image name="mainIcon" width="74" height="91"/>
+        <image name="settings" width="30" height="30"/>
     </resources>
 </document>

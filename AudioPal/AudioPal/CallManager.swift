@@ -124,6 +124,12 @@ extension CallManager {
         if localStatus != .Available {
             return false
         }
+        
+        if ADProcessor.isMicrophoneAccessDenied() {
+            askForMicrophoneAccess()
+            return false
+        }
+        
         var inputStream: InputStream?
         var outputStream: OutputStream?
         let success = pal.service.getInputStream(&inputStream, outputStream: &outputStream)
@@ -150,7 +156,9 @@ extension CallManager {
         if currentCall != call {
             return false
         }
+        
         call.prepareForAudioProcessing()
+        call.audioProcessor?.delegate = self
         reportStartedCall(call)
         return true
     }
@@ -199,6 +207,12 @@ extension CallManager {
         }
         currentCall.toggleSpeaker()
         self.delegate?.callManager(self, didActivateSpeaker: currentCall.useSpeakers, call: currentCall)
+    }
+    
+    func askForMicrophoneAccess() {
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: NotificationNames.micAccessRequired),
+                                        object: self,
+                                        userInfo: nil)
     }
 }
 
@@ -295,8 +309,10 @@ extension CallManager {
             self.currentCall = Call(pal: pal, inputStream: streams.input,
                                    outputStream: streams.output,
                                    asCaller: false)
-            self.interactionProvider.reportIncomingCall(call: self.currentCall!)
-            self.reportStartedCall(self.currentCall!)
+            if let call = self.currentCall {
+                self.interactionProvider.reportIncomingCall(call: call)
+                self.reportStartedCall(call)
+            }
         }
     }
 }
@@ -615,11 +631,6 @@ extension CallManager {
                     return
                 }
             }
-            
-//            var uuid: UUID?
-//            var username: String?
-//            var status: PalStatus
-//            var service: NetService!
             
             service.delegate = self
             service.resolve(withTimeout: 5.0)

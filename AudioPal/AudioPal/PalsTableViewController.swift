@@ -55,6 +55,7 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         if (userName == nil) {
             self.parent!.performSegue(withIdentifier: StoryboardSegues.setName, sender: self)
         } else {
+            ADProcessor.askForMicrophoneAccess()
             startCallManager()
         }
     }
@@ -94,6 +95,16 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
                                                queue: nil) { (notification) in
                                                 self.userName = (notification.userInfo![StoredValues.username] as! String)
                                                 self.startCallManager()
+        }
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: NotificationNames.micAccessRequired),
+                                               object: nil, queue: nil) { (notification) in
+                                                let alert = UIAlertController(title: "Microphone access denied!",
+                                                                              message: "AudioPal needs access to the microphone to work.\n" +
+                                                                                       "Please grant access by going to the privacy section of your iPhone.",
+                                                                              preferredStyle: UIAlertControllerStyle.alert)
+                                                alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+                                                self.present(alert, animated: true, completion: nil)
         }
     }
     

@@ -21,7 +21,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>The microphone is needed to perform calls.</string>
+	<string>AudioPal needs access to the microphone in order to perform audio calls</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>voip</string>

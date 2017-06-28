@@ -207,7 +207,6 @@ static UInt32 const m_encBitrate = 32000;
     
     AudioUnitInitialize(m_audioComponent);
     AudioOutputUnitStart(m_audioComponent);
-    [self checkForPermission];
     NSLog(@"Audio processing started");
 }
 
@@ -269,32 +268,36 @@ static UInt32 const m_encBitrate = 32000;
     });
 }
 
-- (void)checkForPermission {
++ (void)askForMicrophoneAccess {
     AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
     
     switch (permissionStatus) {
         case AVAudioSessionRecordPermissionUndetermined:{
             [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-                // CALL YOUR METHOD HERE - as this assumes being called only once from user interacting with permission alert!
                 if (granted) {
-                    NSLog(@"Mic access granted");
+                    NSLog(@"Mic permission determined: Access granted");
                 }
                 else {
-                   NSLog(@"Mic access not granted");
+                    NSLog(@"Mic permission determined: Access denied");
                 }
             }];
             break;
         }
         case AVAudioSessionRecordPermissionDenied:
             NSLog(@"Mic permission denied");
+
             break;
         case AVAudioSessionRecordPermissionGranted:
-            NSLog(@"Mic permission granted");
+            NSLog(@"Mic permission granted.");
             break;
         default:
-            // this should not happen.. maybe throw an exception.
             break;
     }
+}
+
++ (BOOL)isMicrophoneAccessDenied {
+    AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
+    return permissionStatus == AVAudioSessionRecordPermissionDenied;
 }
 
 #pragma mark - Audio samples processing 
