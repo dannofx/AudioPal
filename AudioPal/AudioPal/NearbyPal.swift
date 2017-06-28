@@ -25,5 +25,19 @@ class NearbyPal: NSObject {
         self.service = service
         self.status = .NoAvailable
     }
+    
+    class func isAscendant(_ pal1: NearbyPal, _ pal2: NearbyPal) -> Bool{
+        if pal1.status == pal2.status {
+            guard let username1 = pal1.username else {
+                return true
+            }
+            guard let username2 = pal2.username else {
+                return false
+            }
+            return username1.lowercased() < username2.lowercased()
+        } else {
+            return pal1.status.rawValue < pal2.status.rawValue
+        }
+    }
 
 }

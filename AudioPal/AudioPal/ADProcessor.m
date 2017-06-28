@@ -207,7 +207,7 @@ static UInt32 const m_encBitrate = 32000;
     
     AudioUnitInitialize(m_audioComponent);
     AudioOutputUnitStart(m_audioComponent);
-    
+    [self checkForPermission];
     NSLog(@"Audio processing started");
 }
 
@@ -267,6 +267,34 @@ static UInt32 const m_encBitrate = 32000;
         }
         [receivedBuffers addObject:buffer];
     });
+}
+
+- (void)checkForPermission {
+    AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
+    
+    switch (permissionStatus) {
+        case AVAudioSessionRecordPermissionUndetermined:{
+            [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                // CALL YOUR METHOD HERE - as this assumes being called only once from user interacting with permission alert!
+                if (granted) {
+                    NSLog(@"Mic access granted");
+                }
+                else {
+                   NSLog(@"Mic access not granted");
+                }
+            }];
+            break;
+        }
+        case AVAudioSessionRecordPermissionDenied:
+            NSLog(@"Mic permission denied");
+            break;
+        case AVAudioSessionRecordPermissionGranted:
+            NSLog(@"Mic permission granted");
+            break;
+        default:
+            // this should not happen.. maybe throw an exception.
+            break;
+    }
 }
 
 #pragma mark - Audio samples processing 

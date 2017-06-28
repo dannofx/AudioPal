@@ -14,6 +14,7 @@
 
 - (void)processor:(ADProcessor *)processor didReceiveRecordedBuffer:(NSData *)buffer;
 - (void)processor:(ADProcessor *)processor didFailPlayingBuffer:(NSData *)buffer withError:(NSError *) error;
+//- (void)processorDidDeniedPermission:(ADProcessor *)processor;
 
 @end
 

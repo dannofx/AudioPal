@@ -152,11 +152,12 @@ extension PalsTableViewController {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
         print("Inserting")
         tableView.beginUpdates()
-        let indexPath = IndexPath.init(row: connectedPals.count, section: 0)
-        connectedPals.append(pal)
+        let index = connectedPals.sortedInsert(item: pal, isAscendant: NearbyPal.isAscendant)
+        let indexPath = IndexPath.init(row: index, section: 0)
         checkForNoPalsView()
         tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
+        
     }
     
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal) {
@@ -189,13 +190,19 @@ extension PalsTableViewController {
     }
     
     func updateCell(forPal pal: NearbyPal) {
-        guard let index = connectedPals.index(of: pal) else {
+        guard connectedPals.index(of: pal) != nil else {
             return
         }
         print("Updating")
         tableView.beginUpdates()
-        let indexPath = IndexPath.init(row: index, section: 0)
-        tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        guard let tuple = connectedPals.sortedUpdate(item: pal, isAscendant: NearbyPal.isAscendant) else {
+            return
+        }
+        let oldIndexPath = IndexPath.init(row: tuple.old, section: 0)
+        let newIndexPath = IndexPath.init(row: tuple.new, section: 0)
+        
+        tableView.moveRow(at: oldIndexPath, to: newIndexPath)
+        //tableView.reloadRows(at: [newIndexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
     }
 }
