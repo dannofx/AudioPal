@@ -15,6 +15,7 @@ class CallViewController: UIViewController, CallManagerDelegate {
     @IBOutlet var mute_button: UIButton!
     @IBOutlet var hang_button: UIButton!
     @IBOutlet var speaker_button: UIButton!
+    
     var lastStatus: CallStatus!
     weak var callManager: CallManager?
 
@@ -22,6 +23,7 @@ class CallViewController: UIViewController, CallManagerDelegate {
         super.viewDidLoad()
         lastStatus = .dialing
         callManager?.delegate = self
+        addBackgroundBlur()
         updateState()
     }
 
@@ -30,7 +32,39 @@ class CallViewController: UIViewController, CallManagerDelegate {
         // Dispose of any resources that can be recreated.
     }
     
+    override var shouldAutorotate: Bool {
+        return false
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.portrait
+    }
+    
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return UIInterfaceOrientation.portrait
+    }
+}
 
+// MARK: - Style
+
+extension CallViewController {
+    
+    func addBackgroundBlur() {
+//        if UIAccessibilityIsReduceTransparencyEnabled() {
+//            self.view.backgroundColor = UIColor.untBlueGreen
+//        } else {
+//            let blurEffect = UIBlurEffect(style: .dark)
+//            let blurredView = UIVisualEffectView(effect: blurEffect)
+//            blurredView.frame = self.view.bounds
+//            blurredView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+//            self.view.addSubview(blurredView)
+//        }
+    }
+}
+
+// MARK: - Status updates
+
+extension CallViewController {
     func updateState() {
         guard let status = callManager?.currentCall?.callStatus else {
             return
@@ -65,8 +99,6 @@ class CallViewController: UIViewController, CallManagerDelegate {
         mute_button.isHidden = true
         speaker_button.isHidden = true
     }
-    
-
 }
 
 extension CallViewController {
