@@ -8,12 +8,14 @@
 
 import UIKit
 
-let acceptanceFlag: UInt8 = 100
-
-enum CallAnswer: Int {
+enum CallAnswer: UInt8 {
     case acceptance = 100
     case wait = 101
     case unknown = 102
+    
+    init(fromRaw value: UInt8) {
+        self = CallAnswer(rawValue: value) ?? .unknown
+    }
 }
 
 enum CallStatus: Int {
@@ -76,9 +78,9 @@ extension Call {
         return success
     }
     
-    func answerCall() {
+    func answerCall(_ answer: CallAnswer) {
         if outputStream.hasSpaceAvailable {
-            var flag = acceptanceFlag
+            var flag = answer.rawValue
             outputStream.write(&flag, maxLength: 1)
             print("Call started: accepted")
             callStatus = .onCall
@@ -87,23 +89,24 @@ extension Call {
         }
     }
     
-    func processAnswer() -> Bool {
+    func processAnswer() -> CallAnswer {
         if callStatus != .presented {
-            return false
+            return CallAnswer.unknown
         }
+        
         if inputStream.hasBytesAvailable {
             var flag: UInt8 = 0
             inputStream.read(&flag, maxLength: 1)
-            if flag == acceptanceFlag {
+            let answer = CallAnswer(fromRaw: flag)
+
+            if answer == CallAnswer.acceptance {
                 print("Call started: acceptance")
                 callStatus = .onCall
-                return true
-            } else {
-                return false
             }
+            return answer
         }
         
-        return false
+        return CallAnswer.unknown
     }
 }
 

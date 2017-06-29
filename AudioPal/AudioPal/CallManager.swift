@@ -172,7 +172,7 @@ extension CallManager {
         if localStatus != .Available {
             return false
         }
-        call.answerCall()
+        call.answerCall(.acceptance)
         // Update information for nearby pals
         localStatus = .Occupied
         propagateLocalTxtRecord()
@@ -261,12 +261,12 @@ extension CallManager {
     func readData(fromCall call: Call) {
         switch call.callStatus {
         case .presented:
-            let success = call.processAnswer()
+            let answer = call.processAnswer()
             DispatchQueue.main.async {
-                if success {
+                if answer == CallAnswer.acceptance {
                     self.interactionProvider.reportOutgoingCall(call: call)
                     self.reportEstablishedCall(call)
-                } else {
+                } else if answer == CallAnswer.unknown {
                     self.endCall(call)
                 }
             }
@@ -318,6 +318,7 @@ extension CallManager {
                                    asCaller: false)
             if let call = self.currentCall {
                 if self.shouldAcceptIncomingCall(call) {
+                    call.answerCall(.wait)
                     self.interactionProvider.reportIncomingCall(call: call)
                     self.reportStartedCall(call)
                 } else {
@@ -678,7 +679,7 @@ extension CallManager {
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
             case Stream.Event.openCompleted:
-                print("Completed")
+                print("Stream open completed")
             case Stream.Event.hasSpaceAvailable:
                 if currentCall?.outputStream == aStream {
                     checkForDataToWrite(currentCall!)
@@ -686,14 +687,14 @@ extension CallManager {
             case Stream.Event.hasBytesAvailable:
                 self.readInputData(aStream as! InputStream)
             case Stream.Event.errorOccurred:
-                print("Error")
+                print("Error on stream")
 //                if let call = currentCall {
 //                    DispatchQueue.main.async {
 //                        self.endCall(call)
 //                    }
 //                }
             case Stream.Event.endEncountered:
-                print("End encountered")
+                print("End encountered in stream")
                 if let call = currentCall {
                     DispatchQueue.main.async {
                         self.endCall(call)
