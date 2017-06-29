@@ -24,5 +24,9 @@ struct NotificationNames {
 struct PacketKeys {
     static let username = "un"
     static let uuid = "uid"
-    static let pal_status = "p_st"
+    static let palStatus = "p_st"
+}
+
+struct DictionaryKeys {
+    static let missedCall = "missedCall"
 }

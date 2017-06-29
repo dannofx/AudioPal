@@ -10,6 +10,12 @@ import UIKit
 
 let acceptanceFlag: UInt8 = 100
 
+enum CallAnswer: Int {
+    case acceptance = 100
+    case wait = 101
+    case unknown = 102
+}
+
 enum CallStatus: Int {
     case dialing
     case presented

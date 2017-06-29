@@ -99,13 +99,28 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: NotificationNames.micAccessRequired),
                                                object: nil, queue: nil) { (notification) in
-                                                let alert = UIAlertController(title: "Microphone access denied!",
-                                                                              message: "AudioPal needs access to the microphone to work.\n" +
-                                                                                       "Please grant access by going to the privacy section of your iPhone.",
-                                                                              preferredStyle: UIAlertControllerStyle.alert)
-                                                alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
-                                                self.present(alert, animated: true, completion: nil)
+                                                let missedCall = (notification.userInfo![DictionaryKeys.missedCall] as! Bool)
+                                                self.showPermissionsAlert(missedCall: missedCall)
         }
+    }
+    
+    func showPermissionsAlert(missedCall: Bool) {
+        let title: String!
+        let message: String!
+        if missedCall {
+            title = "Rejected call"
+            message = "A call was rejected due you haven't granted access to the microphone. " +
+                      "Please grant access by going to the privacy section of your iPhone."
+        } else {
+            title = "Microphone access denied!"
+            message = "AudioPal needs access to the microphone to work.\n" +
+                      "Please grant access by going to the privacy section of your iPhone."
+        }
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
     
     deinit {
@@ -205,15 +220,16 @@ extension PalsTableViewController {
             return
         }
         print("Updating")
-        tableView.beginUpdates()
         guard let tuple = connectedPals.sortedUpdate(item: pal, isAscendant: NearbyPal.isAscendant) else {
             return
         }
+        tableView.beginUpdates()
         let oldIndexPath = IndexPath.init(row: tuple.old, section: 0)
         let newIndexPath = IndexPath.init(row: tuple.new, section: 0)
-        
         tableView.moveRow(at: oldIndexPath, to: newIndexPath)
-        //tableView.reloadRows(at: [newIndexPath], with: UITableViewRowAnimation.automatic)
+        tableView.endUpdates()
+        tableView.beginUpdates()
+        tableView.reloadRows(at: [newIndexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
     }
 }

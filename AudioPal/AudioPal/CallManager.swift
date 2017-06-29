@@ -126,7 +126,7 @@ extension CallManager {
         }
         
         if ADProcessor.isMicrophoneAccessDenied() {
-            askForMicrophoneAccess()
+            askForMicrophoneAccess(forMissedCall: false)
             return false
         }
         
@@ -152,18 +152,23 @@ extension CallManager {
     }
     
     func prepareOutgoingCall(_ call: Call) -> Bool {
-        
         if currentCall != call {
             return false
         }
-        
         call.prepareForAudioProcessing()
-        call.audioProcessor?.delegate = self
         reportStartedCall(call)
         return true
     }
     
-    func acceptIncomingCall(_ call: Call) -> Bool{
+    func shouldAcceptIncomingCall(_ call: Call) -> Bool {
+        if ADProcessor.isMicrophoneAccessDenied() {
+            askForMicrophoneAccess(forMissedCall: true)
+            return false
+        }
+        return true
+    }
+    
+    func acceptIncomingCall(_ call: Call) -> Bool {
         if localStatus != .Available {
             return false
         }
@@ -209,10 +214,12 @@ extension CallManager {
         self.delegate?.callManager(self, didActivateSpeaker: currentCall.useSpeakers, call: currentCall)
     }
     
-    func askForMicrophoneAccess() {
+    func askForMicrophoneAccess( forMissedCall missedCall: Bool) {
+        
+        let userInfo = [ DictionaryKeys.missedCall: missedCall]
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: NotificationNames.micAccessRequired),
                                         object: self,
-                                        userInfo: nil)
+                                        userInfo: userInfo)
     }
 }
 
@@ -310,8 +317,12 @@ extension CallManager {
                                    outputStream: streams.output,
                                    asCaller: false)
             if let call = self.currentCall {
-                self.interactionProvider.reportIncomingCall(call: call)
-                self.reportStartedCall(call)
+                if self.shouldAcceptIncomingCall(call) {
+                    self.interactionProvider.reportIncomingCall(call: call)
+                    self.reportStartedCall(call)
+                } else {
+                    self.endCall(call)
+                }
             }
         }
     }
@@ -398,7 +409,7 @@ extension CallManager {
         // Make a dictionary compatible with txt records format
         let packet: [String : Data] = [ PacketKeys.username: username_data,
                                         PacketKeys.uuid: uuid_data,
-                                        PacketKeys.pal_status: status_data]
+                                        PacketKeys.palStatus: status_data]
         
         // Create the record
         let txt = NetService.data(fromTXTRecord: packet)
@@ -416,7 +427,7 @@ extension CallManager {
         guard let uuid_data = dict[PacketKeys.uuid] else {
             return nil
         }
-        guard let status_data = dict[PacketKeys.pal_status] else {
+        guard let status_data = dict[PacketKeys.palStatus] else {
             return nil
         }
         
