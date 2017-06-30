@@ -83,7 +83,9 @@ extension Call {
             var flag = answer.rawValue
             outputStream.write(&flag, maxLength: 1)
             print("Call started: accepted")
-            callStatus = .onCall
+            if answer == CallAnswer.acceptance {
+                callStatus = .onCall
+            }
         } else {
             print("The call was not answered")
         }

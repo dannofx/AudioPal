@@ -8,23 +8,37 @@
 
 import UIKit
 
+let mediumScreenWidth: CGFloat = 375.0
+let smallScreenWidth: CGFloat = 320.0
+
 class CallViewController: UIViewController, CallManagerDelegate {
     
-    @IBOutlet var username_label: UILabel!
-    @IBOutlet var message_label: UILabel!
-    @IBOutlet var mute_button: UIButton!
-    @IBOutlet var hang_button: UIButton!
-    @IBOutlet var speaker_button: UIButton!
-    
-    var lastStatus: CallStatus!
+    @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var muteButton: UIButton!
+    @IBOutlet weak var hangButton: UIButton!
+    @IBOutlet weak var speakerButton: UIButton!
+    // Constraints
+    @IBOutlet var buttonDiameters: [NSLayoutConstraint]!
+    @IBOutlet weak var bottomSpace: NSLayoutConstraint!
+    @IBOutlet weak var topSpace: NSLayoutConstraint!
+    @IBOutlet weak var labelsSpace: NSLayoutConstraint!
+    @IBOutlet var buttonSpaces: [NSLayoutConstraint]!
+    // UI values
+    var buttonSapceVal: CGFloat!
+    // Call variables
     weak var callManager: CallManager?
+    fileprivate var startCallDate: Date?
+    fileprivate var callTimer: Timer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        lastStatus = .dialing
+        accomodatePhoneControls()
         callManager?.delegate = self
-        addBackgroundBlur()
         updateState()
+        view.setNeedsUpdateConstraints()
+        view.layoutIfNeeded()
+        usernameLabel.text = callManager?.currentCall?.pal.username ?? ""
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,20 +59,41 @@ class CallViewController: UIViewController, CallManagerDelegate {
     }
 }
 
-// MARK: - Style
+// MARK: - UIControls position
 
 extension CallViewController {
+    func accomodatePhoneControls() {
+        let width = self.view.bounds.size.width
+        if width <= smallScreenWidth {
+            accomodateForSmallScreen()
+        } else if width <= mediumScreenWidth {
+            accomodateForMediumScreen()
+        }
+        accomodateButtonsToFirstPosition()
+    }
     
-    func addBackgroundBlur() {
-//        if UIAccessibilityIsReduceTransparencyEnabled() {
-//            self.view.backgroundColor = UIColor.untBlueGreen
-//        } else {
-//            let blurEffect = UIBlurEffect(style: .dark)
-//            let blurredView = UIVisualEffectView(effect: blurEffect)
-//            blurredView.frame = self.view.bounds
-//            blurredView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-//            self.view.addSubview(blurredView)
-//        }
+    func accomodateForSmallScreen() {
+        for constraint in buttonDiameters {
+            constraint.constant = 68.0
+        }
+        bottomSpace.constant = 67.0
+        topSpace.constant = 52.0
+        labelsSpace.constant = 1.0
+        usernameLabel.font = UIFont.init(name: usernameLabel.font.fontName, size: 27.0)
+        messageLabel.font = UIFont.init(name: messageLabel.font.fontName, size: 16.0)
+    }
+    
+    func accomodateForMediumScreen() {
+        bottomSpace.constant = 47.0
+        topSpace.constant = 61.0
+        labelsSpace.constant = 6.0
+    }
+    
+    func accomodateButtonsToFirstPosition() {
+        buttonSapceVal = buttonSpaces.first!.constant
+        for space in buttonSpaces {
+            space.constant = buttonDiameters.first!.constant * -1
+        }
     }
 }
 
@@ -78,26 +113,57 @@ extension CallViewController {
         case .responding:
             updateToRespondingState()
         }
-        
-        lastStatus = status
     }
     
     func updateToDialingState() {
-        hang_button.isHidden = false
-        mute_button.isHidden = true
-        speaker_button.isHidden = true
+        hangButton.isHidden = false
+        muteButton.isHidden = true
+        speakerButton.isHidden = true
+        messageLabel.text = "Ringing..."
     }
     
     func updateToOnCallState() {
-        hang_button.isHidden = false
-        mute_button.isHidden = false
-        speaker_button.isHidden = false
+        hangButton.isHidden = false
+        muteButton.isHidden = false
+        speakerButton.isHidden = false
+        for space in buttonSpaces {
+            space.constant = buttonSapceVal
+        }
+        view.setNeedsLayout()
+        UIView.animate(withDuration: 1.0) { 
+            self.view.layoutIfNeeded()
+        }
+        startCallDate = Date()
+        callTimer = Timer.scheduledTimer(timeInterval: 1.0,
+                                         target: self,
+                                         selector: #selector(updateCallTime),
+                                         userInfo: nil,
+                                         repeats: true)
+        updateCallTime()
+        
     }
     
     func updateToRespondingState() {
-        hang_button.isHidden = false
-        mute_button.isHidden = true
-        speaker_button.isHidden = true
+        hangButton.isHidden = true
+        muteButton.isHidden = true
+        speakerButton.isHidden = true
+        messageLabel.text = "Connecting..."
+    }
+    
+    func updateCallTime() {
+        let timeString = stringInterval(forDate: startCallDate)
+        messageLabel.text = "AudioPal Audio \(timeString)"
+    }
+    
+    func stringInterval(forDate date: Date?) -> String {
+        guard let date = date else {
+            return "00:00"
+        }
+        let interval = Int(Date().timeIntervalSince(date))
+        let seconds = interval % 60
+        let minutes = ( interval / 60 )
+        
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 
@@ -115,11 +181,34 @@ extension CallViewController {
     }
     
     @IBAction func toggleMute(sender: UIButton) {
-        callManager?.toggleMute()
+        guard let callManager = callManager else {
+            return
+        }
+        callManager.toggleMute()
+        guard let currentCall = callManager.currentCall else {
+            return
+        }
+        if currentCall.isMuted {
+            muteButton.setImage(#imageLiteral(resourceName: "mute_active"), for: .normal)
+        } else {
+            muteButton.setImage(#imageLiteral(resourceName: "mute"), for: .normal)
+        }
+
     }
     
     @IBAction func toggleSpeaker(sender: UIButton) {
-        callManager?.toggleSpeaker()
+        guard let callManager = callManager else {
+            return
+        }
+        callManager.toggleSpeaker()
+        guard let currentCall = callManager.currentCall else {
+            return
+        }
+        if currentCall.useSpeakers {
+            speakerButton.setImage(#imageLiteral(resourceName: "speaker_active"), for: .normal)
+        } else {
+            speakerButton.setImage(#imageLiteral(resourceName: "speaker"), for: .normal)
+        }
     }
 }
 
@@ -136,6 +225,8 @@ extension CallViewController {
     
     func callManager(_ callManager: CallManager, didEndCall call: Call, error: Error?) {
         // Is therea way to know if it's a rejected call?
+        callTimer?.invalidate()
+        callTimer = nil
         self.dismiss(animated: true)
     }
     
