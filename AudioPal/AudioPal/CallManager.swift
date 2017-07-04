@@ -161,6 +161,9 @@ extension CallManager {
     }
     
     func shouldAcceptIncomingCall(_ call: Call) -> Bool {
+        if call.pal.isBlocked {
+            return false
+        }
         if ADProcessor.isMicrophoneAccessDenied() {
             askForMicrophoneAccess(forMissedCall: true)
             return false

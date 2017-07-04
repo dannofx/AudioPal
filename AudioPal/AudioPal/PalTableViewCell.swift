@@ -26,6 +26,12 @@ class PalTableViewCell: UITableViewCell {
     func configure(withPal pal: NearbyPal) {
         self.usernameLabel.text = pal.username
         
+        if pal.isBlocked {
+            self.stateLabel.text = "Blocked"
+            self.stateImage.image = UIImage(named: "userBlocked")
+            return
+        }
+        
         switch pal.status {
         case .Available:
             self.stateLabel.text = "Available"
@@ -33,9 +39,6 @@ class PalTableViewCell: UITableViewCell {
         case .Occupied:
             self.stateLabel.text = "Occupied"
             self.stateImage.image = UIImage(named: "userOccupied")
-        case .Blocked:
-            self.stateLabel.text = "Blocked"
-            self.stateImage.image = UIImage(named: "userBlocked")
         default:
             print("The pal state can't be represented in cell")
         }

@@ -141,14 +141,12 @@ extension PalsTableViewController {
         return connectedPals.count
     }
     
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "palCell", for: indexPath) as! PalTableViewCell
         let pal = connectedPals[indexPath.row]
         cell.configure(withPal: pal)
         return cell
     }
-    
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
@@ -158,7 +156,6 @@ extension PalsTableViewController {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
     }
-    
 }
 
 // MARK: - Table view delegate
@@ -168,6 +165,30 @@ extension PalsTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pal = connectedPals[indexPath.row]
         _ = callManager.startCall(toPal: pal)
+    }
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let pal = connectedPals[indexPath.row]
+        let title: String!
+        let color: UIColor!
+        
+        if pal.isBlocked {
+            title = "Unblock"
+            color = UIColor.untGreen
+        } else {
+            title = "Block"
+            color = UIColor.untReddish
+        }
+        
+        let blockAction = UITableViewRowAction(style: UITableViewRowActionStyle.default, title: title){ (_, _) in
+            pal.isBlocked = !pal.isBlocked
+            self.tableView.beginUpdates()
+            tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+            self.tableView.endUpdates()
+        }
+        blockAction.backgroundColor = color
+        
+        return [blockAction]
     }
 }
 
