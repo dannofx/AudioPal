@@ -39,7 +39,7 @@ class SettingsTableViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifiers.blockedPal, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifiers.username, for: indexPath)
 
         return cell
     }

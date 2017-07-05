@@ -33,6 +33,9 @@ struct DictionaryKeys {
 
 struct CellIdentifiers {
     static let pal = "palCell"
-    static let blockedPal = "blockedPal"
+    static let blockedPal = "blockedPalCell"
+    static let username = "usernameCell"
+    static let version = "versionCell"
+    static let info = "infoCell"
 }
 
