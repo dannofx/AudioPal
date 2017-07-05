@@ -75,6 +75,7 @@
                                         <constraint firstItem="24K-jE-2Ut" firstAttribute="trailing" secondItem="yWU-gZ-d8s" secondAttribute="trailingMargin" id="uls-iE-ViW"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <outlet property="stateImage" destination="iQP-we-FfY" id="rLc-Pp-F0k"/>
                                     <outlet property="stateLabel" destination="cLw-D1-FCx" id="Ahj-qG-n7X"/>
@@ -88,8 +89,12 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Available Users" id="eXe-SV-foD">
+                        <barButtonItem key="backBarButtonItem" title=" " id="auP-IA-aQq"/>
                         <barButtonItem key="rightBarButtonItem" image="settings" id="hbD-LL-5na">
                             <color key="tintColor" red="0.98633545639999998" green="0.92029303309999999" blue="0.73148912190000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <segue destination="jbM-xM-Zqy" kind="show" id="dhD-yD-Ccf"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
@@ -99,6 +104,58 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x7D-iz-hJQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="935.625" y="125.70422535211267"/>
+        </scene>
+        <!--Settings Table View Controller-->
+        <scene sceneID="5cX-Aj-5Vv">
+            <objects>
+                <tableViewController id="jbM-xM-Zqy" customClass="SettingsTableViewController" customModule="AudioPal" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="RxK-AI-ski">
+                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="blockedPal" rowHeight="68" id="tkl-j1-tS7">
+                                <rect key="frame" x="0.0" y="56" width="375" height="68"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="tkl-j1-tS7" id="B4y-Li-Kom">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="68"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1wm-Vw-Jyb">
+                                            <rect key="frame" x="0.0" y="67" width="375" height="1"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <color key="backgroundColor" red="1" green="0.82849603890000001" blue="0.30513012410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </view>
+                                        <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mkD-xY-7dy">
+                                            <rect key="frame" x="266" y="19" width="62" height="30"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <state key="normal" title="unblock">
+                                                <color key="titleColor" red="0.74080616239999997" green="0.28776863219999999" blue="0.19608706240000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            </state>
+                                        </button>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Danno" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vsm-Nt-TQN">
+                                            <rect key="frame" x="20" y="23" width="52.5" height="22"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </tableViewCell>
+                        </prototypes>
+                        <sections/>
+                        <connections>
+                            <outlet property="dataSource" destination="jbM-xM-Zqy" id="NAF-Pv-pNb"/>
+                            <outlet property="delegate" destination="jbM-xM-Zqy" id="zpd-sl-T54"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="nTZ-g9-mcs" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1852" y="-611.24437781109452"/>
         </scene>
         <!--Call View Controller-->
         <scene sceneID="pii-xS-ZlR">

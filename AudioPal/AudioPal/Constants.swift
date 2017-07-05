@@ -31,3 +31,8 @@ struct DictionaryKeys {
     static let missedCall = "missedCall"
 }
 
+struct CellIdentifiers {
+    static let pal = "palCell"
+    static let blockedPal = "blockedPal"
+}
+

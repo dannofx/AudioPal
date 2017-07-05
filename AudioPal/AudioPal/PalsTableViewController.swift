@@ -40,6 +40,7 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
             let backgroundImage = UIImage.imageWithColor(color: .untBlueGreen, height: navigationBar.frame.height + 20.0)
             navigationBar.setBackgroundImage(backgroundImage, for: .default)
             navigationBar.shadowImage = UIImage.imageWithColor(color: .untMustardYellow, height: 6.0)
+            //FIXME: Esto ocupa espacio de mas en la vista hija
         }
         registerForNotifications()
         checkForNoPalsView()
@@ -142,7 +143,7 @@ extension PalsTableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "palCell", for: indexPath) as! PalTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifiers.pal, for: indexPath) as! PalTableViewCell
         let pal = connectedPals[indexPath.row]
         cell.configure(withPal: pal)
         return cell
