@@ -273,6 +273,9 @@ extension CallManager {
                     self.endCall(call)
                 }
             }
+        case .responding:
+            // Just clean the buffer meanwhile the conversation starts 
+            _ = call.readInputBuffer()
         case .onCall:
             guard let data = call.readInputBuffer() else {
                 return
