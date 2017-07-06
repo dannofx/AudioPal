@@ -9,6 +9,7 @@
 struct StoryboardSegues {
     static let setName = "setName"
     static let showCall = "showCall"
+    static let about = "about"
 }
 
 struct StoredValues {

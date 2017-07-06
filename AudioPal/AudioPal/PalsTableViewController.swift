@@ -73,6 +73,13 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         callManager.start()
     }
     
+    func restartCallManager() {
+        if callManager.isStarted {
+            callManager.stop()
+        }
+        startCallManager()
+    }
+    
     func checkForNoPalsView() {
         if connectedPals.count == 0 {
             let emptyView = Bundle.main.loadNibNamed("EmptyTable", owner: self, options: nil)!.first as! UIView
@@ -97,7 +104,7 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
                                                object: nil,
                                                queue: nil) { (notification) in
                                                 self.userName = (notification.userInfo![StoredValues.username] as! String)
-                                                self.startCallManager()
+                                                self.restartCallManager()
         }
         
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: NotificationNames.micAccessRequired),

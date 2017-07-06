@@ -91,6 +91,10 @@ extension CallManager {
         
     }
     
+    public var isStarted: Bool {
+        return localService != nil
+    }
+    
     public func start() {
         streamQueue.async {
             self.streamThread = Thread.current
@@ -391,7 +395,7 @@ private extension CallManager {
     }
     
     @objc func stopRunLoop() {
-        CFRunLoopStop(RunLoop.current as! CFRunLoop)
+        CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
 
