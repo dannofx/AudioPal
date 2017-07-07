@@ -105,6 +105,11 @@ class SettingsTableViewController: UITableViewController, UITextFieldDelegate {
         }
         
     }
+    
+    deinit {
+        saveButton = nil
+        cancelButton = nil
+    }
 }
     
 // MARK: - Username management

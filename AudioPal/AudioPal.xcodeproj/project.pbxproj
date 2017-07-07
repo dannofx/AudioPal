@@ -24,6 +24,7 @@
 		5175FCD91ECEA1B300A28166 /* PalsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */; };
 		5175FCDB1ECEA3D900A28166 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDA1ECEA3D900A28166 /* Constants.swift */; };
 		5175FCDD1ECEAF0900A28166 /* SetNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */; };
+		5190CB651F0F3126003B4271 /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5190CB641F0F3126003B4271 /* InfoViewController.swift */; };
 		519B8B4B1F02150F0048FB82 /* EmptyTable.xib in Resources */ = {isa = PBXBuildFile; fileRef = 519B8B4A1F02150F0048FB82 /* EmptyTable.xib */; };
 		519B8B4D1F0223010048FB82 /* UIImage+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519B8B4C1F0223010048FB82 /* UIImage+Utils.swift */; };
 		519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519D696E1ED3EC6B00271B2C /* CallManager.swift */; };
@@ -69,6 +70,7 @@
 		5175FCD81ECEA1B300A28166 /* PalsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PalsTableViewController.swift; sourceTree = "<group>"; };
 		5175FCDA1ECEA3D900A28166 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetNameViewController.swift; sourceTree = "<group>"; };
+		5190CB641F0F3126003B4271 /* InfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
 		519B8B4A1F02150F0048FB82 /* EmptyTable.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EmptyTable.xib; sourceTree = "<group>"; };
 		519B8B4C1F0223010048FB82 /* UIImage+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Utils.swift"; sourceTree = "<group>"; };
 		519D696E1ED3EC6B00271B2C /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				5175FCDC1ECEAF0900A28166 /* SetNameViewController.swift */,
 				51B813E91EF19C38007CA2EA /* CallViewController.swift */,
 				513ABA381F0CA41000FE9FD0 /* SettingsTableViewController.swift */,
+				5190CB641F0F3126003B4271 /* InfoViewController.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -347,6 +350,7 @@
 				51B813EA1EF19C38007CA2EA /* CallViewController.swift in Sources */,
 				514AE33F1F035B97004384E6 /* Array+Utils.swift in Sources */,
 				519D696F1ED3EC6B00271B2C /* CallManager.swift in Sources */,
+				5190CB651F0F3126003B4271 /* InfoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

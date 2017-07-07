@@ -40,3 +40,5 @@ struct CellIdentifiers {
     static let info = "infoCell"
 }
 
+let repoURL = "https://github.com/dannofx/AudioPal/"
+
