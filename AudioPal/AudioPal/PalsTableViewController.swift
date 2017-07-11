@@ -16,21 +16,26 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         return UserDefaults.standard.value(forKey: StoredValues.username) as? String
     }()
     
+    fileprivate var dataController: DataController
+    
     override init(style: UITableViewStyle) {
         callManager = CallManager()
         connectedPals = []
+        dataController = DataController()
         super.init(style: style)
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         callManager = CallManager()
         connectedPals = []
+        dataController = DataController()
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
     
     required init?(coder aDecoder: NSCoder) {
         callManager = CallManager()
         connectedPals = []
+        dataController = DataController()
         super.init(coder: aDecoder)
     }
 
@@ -114,17 +119,26 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         }
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+}
+
+// MARK: - Alerts 
+extension PalsTableViewController {
+    
     func showPermissionsAlert(missedCall: Bool) {
         let title: String!
         let message: String!
         if missedCall {
             title = "Rejected call"
             message = "A call was rejected due you haven't granted access to the microphone. " +
-                      "Please grant access by going to the privacy section of your iPhone."
+            "Please grant access by going to the privacy section of your iPhone."
         } else {
             title = "Microphone access denied!"
             message = "AudioPal needs access to the microphone to work.\n" +
-                      "Please grant access by going to the privacy section of your iPhone."
+            "Please grant access by going to the privacy section of your iPhone."
         }
         let alert = UIAlertController(title: title,
                                       message: message,
@@ -133,10 +147,15 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    func showCannotCallAlert(blockedPal: NearbyPal) {
+        let title = "Blocked user"
+        let message = "You need to unblock \(blockedPal.username!) to perform a call."
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
-
 }
 
 // MARK: - Table view data source
@@ -174,7 +193,12 @@ extension PalsTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let pal = connectedPals[indexPath.row]
-        _ = callManager.startCall(toPal: pal)
+        if !pal.isBlocked {
+            _ = callManager.startCall(toPal: pal)
+        } else {
+            showCannotCallAlert(blockedPal: pal)
+        }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
@@ -195,6 +219,7 @@ extension PalsTableViewController {
             self.tableView.beginUpdates()
             tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
             self.tableView.endUpdates()
+            self.dataController.updateBlockStatus(pal: pal)
         }
         blockAction.backgroundColor = color
         
@@ -215,6 +240,12 @@ extension PalsTableViewController {
         tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
         
+        dataController.checkIfBlocked(pal: pal) { (pal, blocked) in
+            if pal.isBlocked != blocked {
+                pal.isBlocked = blocked
+                self.updateCell(forPal: pal)
+            }
+        }
     }
     
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal) {
