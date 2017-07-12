@@ -93,7 +93,7 @@
                         <barButtonItem key="rightBarButtonItem" image="settings" id="hbD-LL-5na">
                             <color key="tintColor" red="0.98633545639999998" green="0.92029303309999999" blue="0.73148912190000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
-                                <segue destination="jbM-xM-Zqy" kind="show" id="dhD-yD-Ccf"/>
+                                <segue destination="jbM-xM-Zqy" kind="show" identifier="settings" id="dhD-yD-Ccf"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -115,7 +115,7 @@
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="blockedPalCell" rowHeight="68" id="tkl-j1-tS7" customClass="BlockedPalTableViewCell" customModule="AudioPal" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="56" width="320" height="68"/>
+                                <rect key="frame" x="0.0" y="55.5" width="320" height="68"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="tkl-j1-tS7" id="B4y-Li-Kom">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="68"/>
@@ -138,6 +138,9 @@
                                             <state key="normal" title="unblock">
                                                 <color key="titleColor" red="0.74080616239999997" green="0.28776863219999999" blue="0.19608706240000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
+                                            <connections>
+                                                <action selector="unblockUserWithSender:" destination="tkl-j1-tS7" eventType="touchUpInside" id="YM3-gb-rBD"/>
+                                            </connections>
                                         </button>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Danno" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vsm-Nt-TQN">
                                             <rect key="frame" x="18" y="23" width="216" height="22"/>
@@ -158,9 +161,12 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="usernameLabel" destination="Vsm-Nt-TQN" id="8vt-6T-jxH"/>
+                                </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="versionCell" rowHeight="68" id="W2Q-x9-PHe">
-                                <rect key="frame" x="0.0" y="124" width="320" height="68"/>
+                                <rect key="frame" x="0.0" y="123.5" width="320" height="68"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="W2Q-x9-PHe" id="zRt-Z3-7Tm">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="68"/>
@@ -192,7 +198,7 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="infoCell" rowHeight="68" id="gnS-8V-QtB">
-                                <rect key="frame" x="0.0" y="192" width="320" height="68"/>
+                                <rect key="frame" x="0.0" y="191.5" width="320" height="68"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gnS-8V-QtB" id="Jc1-Ml-pV5">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="68"/>
@@ -234,7 +240,7 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="usernameCell" rowHeight="68" id="cre-yb-yhS">
-                                <rect key="frame" x="0.0" y="260" width="320" height="68"/>
+                                <rect key="frame" x="0.0" y="259.5" width="320" height="68"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cre-yb-yhS" id="cYW-qu-RjJ">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="68"/>
@@ -266,6 +272,43 @@
                                         <constraint firstAttribute="trailing" secondItem="MC9-G1-UIt" secondAttribute="trailing" id="WqO-4h-KD5"/>
                                         <constraint firstItem="WUz-FZ-yc7" firstAttribute="leading" secondItem="cYW-qu-RjJ" secondAttribute="leadingMargin" constant="10" id="eZc-fy-YUC"/>
                                         <constraint firstItem="MC9-G1-UIt" firstAttribute="leading" secondItem="cYW-qu-RjJ" secondAttribute="leading" id="jTR-aN-SWQ"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="noBlockedUsers" rowHeight="68" id="sB4-NR-mP6">
+                                <rect key="frame" x="0.0" y="327.5" width="320" height="68"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="sB4-NR-mP6" id="S8W-YI-wc1">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="68"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g4q-Rq-igw">
+                                            <rect key="frame" x="0.0" y="67" width="320" height="1"/>
+                                            <color key="backgroundColor" red="1" green="0.82849603890000001" blue="0.30513012410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="1" id="GiV-vG-AiB"/>
+                                            </constraints>
+                                        </view>
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="No blocked users" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="CiX-Ue-xZC">
+                                            <rect key="frame" x="18" y="12" width="284" height="51"/>
+                                            <color key="tintColor" red="0.72671943900000002" green="0.49674946069999998" blue="0.10795009880000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="textColor" red="0.60777515169999996" green="0.60788232090000005" blue="0.60776835679999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                            <textInputTraits key="textInputTraits"/>
+                                            <connections>
+                                                <action selector="didChangeTextWithSender:" destination="jbM-xM-Zqy" eventType="editingChanged" id="xrx-aI-j4y"/>
+                                            </connections>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailing" secondItem="g4q-Rq-igw" secondAttribute="trailing" id="0og-6e-rf6"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="CiX-Ue-xZC" secondAttribute="trailing" constant="10" id="3Oc-k1-mZ9"/>
+                                        <constraint firstItem="CiX-Ue-xZC" firstAttribute="top" secondItem="S8W-YI-wc1" secondAttribute="topMargin" constant="4" id="7Ph-Gm-oTe"/>
+                                        <constraint firstItem="g4q-Rq-igw" firstAttribute="leading" secondItem="S8W-YI-wc1" secondAttribute="leading" id="9g9-57-MK0"/>
+                                        <constraint firstItem="CiX-Ue-xZC" firstAttribute="leading" secondItem="S8W-YI-wc1" secondAttribute="leadingMargin" constant="10" id="Pzz-f2-oQ7"/>
+                                        <constraint firstItem="g4q-Rq-igw" firstAttribute="top" secondItem="CiX-Ue-xZC" secondAttribute="bottom" constant="4" id="gNJ-NT-uKM"/>
+                                        <constraint firstAttribute="bottom" secondItem="g4q-Rq-igw" secondAttribute="bottom" id="yFQ-Rm-VXg"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -379,7 +422,7 @@
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mej-FX-KEq">
                                                 <rect key="frame" x="15" y="266" width="291" height="718.5"/>
-                                                <mutableString key="text">Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+                                                <string key="text">Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
@@ -387,7 +430,7 @@
 
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</mutableString>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</string>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <color key="textColor" red="0.39995324609999999" green="0.40002685789999998" blue="0.39994865660000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -737,10 +780,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     <resources>
         <image name="appiconsmall" width="66" height="77"/>
         <image name="forward" width="23" height="23"/>
-        <image name="hangup" width="103" height="103"/>
+        <image name="hangup" width="78" height="78"/>
         <image name="mainIcon" width="74" height="91"/>
-        <image name="mute" width="103" height="103"/>
+        <image name="mute" width="78" height="78"/>
         <image name="settings" width="30" height="30"/>
-        <image name="speaker" width="103" height="103"/>
+        <image name="speaker" width="78" height="78"/>
     </resources>
 </document>

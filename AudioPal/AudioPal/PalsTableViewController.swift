@@ -54,6 +54,7 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
             let backgroundImage = UIImage.imageWithColorBars(colorBars, totalHeight: totalHeight)
             navigationBar.setBackgroundImage(backgroundImage, for: .default)
         }
+        dataController.delegate = self
         registerForNotifications()
         checkForNoPalsView()
         
@@ -100,6 +101,9 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
         if segue.identifier == StoryboardSegues.showCall {
             let callViewController = segue.destination as! CallViewController
             callViewController.callManager = callManager
+        }else if segue.identifier == StoryboardSegues.settings {
+            let settingsViewController = segue.destination as! SettingsTableViewController
+            settingsViewController.dataController =  dataController
         }
     }
     
@@ -232,7 +236,7 @@ extension PalsTableViewController {
 extension PalsTableViewController {
     
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal) {
-        print("Inserting")
+        print("Inserting pal in main list")
         tableView.beginUpdates()
         let index = connectedPals.sortedInsert(item: pal, isAscendant: NearbyPal.isAscendant)
         let indexPath = IndexPath.init(row: index, section: 0)
@@ -252,7 +256,7 @@ extension PalsTableViewController {
         guard let index = connectedPals.index(of: pal) else {
             return
         }
-        print("Deleting")
+        print("Deleting pal in main list")
         tableView.beginUpdates()
         let indexPath = IndexPath.init(row: index, section: 0)
         connectedPals.remove(at: index)
@@ -281,7 +285,7 @@ extension PalsTableViewController {
         guard connectedPals.index(of: pal) != nil else {
             return
         }
-        print("Updating")
+        print("Updating pal in main list")
         guard let tuple = connectedPals.sortedUpdate(item: pal, isAscendant: NearbyPal.isAscendant) else {
             return
         }
@@ -293,5 +297,17 @@ extension PalsTableViewController {
         tableView.beginUpdates()
         tableView.reloadRows(at: [newIndexPath], with: UITableViewRowAnimation.automatic)
         tableView.endUpdates()
+    }
+}
+
+// MARK: - Data Controller Delegate
+
+extension PalsTableViewController: DataControllerDelegate {
+    
+    func dataController(_ dataController: DataController, didUnblockUserWithId uuid: UUID) {
+        if let unblockedPal = ( connectedPals.filter{ $0.uuid == uuid }.first ) {
+            unblockedPal.isBlocked = false
+            updateCell(forPal: unblockedPal)
+        }
     }
 }

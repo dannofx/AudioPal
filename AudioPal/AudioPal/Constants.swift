@@ -10,6 +10,7 @@ struct StoryboardSegues {
     static let setName = "setName"
     static let showCall = "showCall"
     static let about = "about"
+    static let settings = "settings"
 }
 
 struct StoredValues {
@@ -35,6 +36,7 @@ struct DictionaryKeys {
 struct CellIdentifiers {
     static let pal = "palCell"
     static let blockedPal = "blockedPalCell"
+    static let noBlockedUsers = "noBlockedUsers"
     static let username = "usernameCell"
     static let version = "versionCell"
     static let info = "infoCell"

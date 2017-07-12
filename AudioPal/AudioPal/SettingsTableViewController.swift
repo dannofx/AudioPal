@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 let versionTag = 60
 let userNameTag = 61
@@ -15,6 +16,17 @@ enum TableSection: Int {
     case username = 0
     case blockedUsers = 1
     case about = 2
+    
+    var index: Int {
+        switch self {
+        case .username:
+            return 0
+        case .blockedUsers:
+            return 1
+        case .about:
+            return 2
+        }
+    }
     
     var title: String {
         switch self {
@@ -27,23 +39,31 @@ enum TableSection: Int {
         }
     }
     
-    var rowsNumber: Int {
+    func rowsNumber(_ fetchedController: NSFetchedResultsController<BlockedUser>?) -> Int {
         switch self {
         case .username:
             return 1
         case .blockedUsers:
-            return 3
+            if let count = fetchedController?.sections?[0].numberOfObjects, count > 0 {
+                return  count
+            } else {
+                return 1
+            }
         case .about:
             return 2
         }
     }
     
-    func cellId(forIndex index: Int) -> String {
+    func cellId(forIndex index: Int, fetchedController: NSFetchedResultsController<BlockedUser>?) -> String {
         switch self {
         case .username:
             return CellIdentifiers.username
         case .blockedUsers:
-            return CellIdentifiers.blockedPal
+            if let count = fetchedController?.sections?[0].numberOfObjects, count > 0 {
+                return  CellIdentifiers.blockedPal
+            } else {
+                return CellIdentifiers.noBlockedUsers
+            }
         case .about:
             if (index == 0) {
                 return CellIdentifiers.info
@@ -72,6 +92,8 @@ enum TableSection: Int {
 class SettingsTableViewController: UITableViewController, UITextFieldDelegate {
     
     fileprivate var username: String!
+    fileprivate var fetchedResultController: NSFetchedResultsController<BlockedUser>!
+    weak var dataController: DataController!
     weak var versionLabel: UILabel?
     weak var usernameTextfield: UITextField?
     @IBOutlet var saveButton: UIBarButtonItem!
@@ -81,6 +103,8 @@ class SettingsTableViewController: UITableViewController, UITextFieldDelegate {
         super.viewDidLoad()
         username = UserDefaults.standard.value(forKey: StoredValues.username) as? String ?? ""
         toggleUsernameButtonsIfNecessary(hidden: true)
+        fetchedResultController = dataController.createFetchedResultController()
+        fetchedResultController.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -172,14 +196,17 @@ extension SettingsTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionVals = TableSection(rawValue: section)!
-        return sectionVals.rowsNumber
+        return sectionVals.rowsNumber(fetchedResultController)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = TableSection(rawValue: indexPath.section)!
-        let cell = tableView.dequeueReusableCell(withIdentifier: section.cellId(forIndex: indexPath.row), for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: section.cellId(forIndex: indexPath.row, fetchedController: fetchedResultController), for: indexPath)
         if let blockedPalCell = cell as? BlockedPalTableViewCell {
-            blockedPalCell.configure(withName: "Foo")
+            let modIndexPath = IndexPath.init(row: indexPath.row, section: 0)
+            let blockedUser = fetchedResultController.object(at: modIndexPath)
+            blockedPalCell.configure(withBlockedUser: blockedUser, atIndex: indexPath.row)
+            blockedPalCell.delegate = self
         } else if let label = cell.viewWithTag(versionTag) as? UILabel {
             versionLabel = label
             loadVersionLabel()
@@ -221,5 +248,59 @@ extension SettingsTableViewController {
         if let segueId = sectionVals.segueId(atIndex: indexPath.row) {
             self.performSegue(withIdentifier: segueId, sender: self)
         }
+    }
+}
+
+// MARK: - Blocked Pal Cell Delegate 
+
+extension SettingsTableViewController: BlockedPalTableViewCellDelegate {
+    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblockAt unblockIndex: Int) {
+        let indexPath = IndexPath.init(row: unblockIndex, section: 0)
+        let blockedUser = fetchedResultController.object(at: indexPath)
+        
+        let alertController = UIAlertController(title: "Unblock user",
+                                                message: "Are you sure you want to unblock \(blockedUser.username ?? "(unknown)")",
+                                         preferredStyle: UIAlertControllerStyle.alert)
+        alertController.addAction(UIAlertAction(title: "Not", style: UIAlertActionStyle.default))
+        alertController.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.default) { action in
+            blockedUser.managedObjectContext?.delete(blockedUser)
+            self.dataController.saveContext()
+        })
+        
+        self.present(alertController, animated: true)
+    }
+}
+
+// MARK: - Fetched Result Controller Delegate
+
+extension SettingsTableViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.beginUpdates()
+    }
+
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        let tableIndexPath = IndexPath.init(row: indexPath!.row, section: TableSection.blockedUsers.rawValue)
+        switch type {
+            case .insert:
+                let tableNewIndexPath = IndexPath.init(row: newIndexPath!.row, section: TableSection.blockedUsers.rawValue)
+                tableView.insertRows(at: [tableNewIndexPath], with: .automatic)
+            case .delete:
+                tableView.deleteRows(at: [tableIndexPath], with: .automatic)
+                if controller.sections![0].numberOfObjects == 0 {
+                    tableView.insertRows(at: [tableIndexPath], with: .automatic) // this cell will show the "empty" message
+                }
+            case .update:
+                let cell =  tableView.cellForRow(at: tableIndexPath) as! BlockedPalTableViewCell
+                let blockedUser = fetchedResultController.object(at: indexPath!)
+                cell.configure(withBlockedUser: blockedUser, atIndex: tableIndexPath.row)
+            case .move:
+                tableView.deleteRows(at: [tableIndexPath], with: .automatic)
+                tableView.insertRows(at: [tableIndexPath], with: .automatic)
+        }
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.endUpdates()
     }
 }

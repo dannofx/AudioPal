@@ -8,20 +8,31 @@
 
 import UIKit
 
+protocol BlockedPalTableViewCellDelegate: class {
+    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblockAt unblockIndex: Int)
+}
+
 class BlockedPalTableViewCell: UITableViewCell {
+    
+    @IBOutlet weak var usernameLabel: UILabel!
+    private var index: Int!
+    weak var delegate: BlockedPalTableViewCellDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
-    func configure(withName name: String) {
     
+    func configure(withBlockedUser blockedUser: BlockedUser, atIndex: Int) {
+        usernameLabel.text = blockedUser.username
+        index = atIndex
+    }
+    
+    @IBAction func unblockUser(sender: Any) {
+        self.delegate?.blockedPalCell(self, didUnblockAt: index)
     }
 
 }
