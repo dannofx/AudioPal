@@ -615,7 +615,7 @@ extension CallManager {
             } else if pal.status == .NoAvailable {
                 // I keep the pal, but it isn't available for the client until
                 // it's available again.
-               // palDelegate?.callManager(self, didDetectDisconnection: pal)
+                palDelegate?.callManager(self, didDetectDisconnection: pal)
             } else {
                 palDelegate?.callManager(self, didPal: pal, changeStatus: pal.status)
             }
