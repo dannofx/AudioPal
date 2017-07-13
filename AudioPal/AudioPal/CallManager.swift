@@ -31,12 +31,13 @@ protocol CallManagerDelegate: class {
 }
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate, ADProcessorDelegate {
-    var localService: NetService!
+    var localService: NetService?
     var serviceBrowser: NetServiceBrowser!
     var localStatus: PalStatus = .NoAvailable
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
     var nearbyPals: [NearbyPal]!
+    var _isStarted: Bool!
     let streamQueue: DispatchQueue
     var streamThread: Thread?
     let interactionProvider: CallInteractionProvider
@@ -62,28 +63,88 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         acceptedStreams = []
         nearbyPals = []
         streamQueue = DispatchQueue(label: "audiopal.callqueue", attributes: .concurrent)
+        _isStarted = false
         super.init()
         interactionProvider.callManager = self
+        registerForBackgroundNotifications()
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+}
+
+// MARK: - Background management
+
+private extension CallManager {
+    
+    func prepareForBonjourSuspension() {
+        if self.currentCall != nil && self.currentCall?.callStatus == CallStatus.responding {
+            //In this case the application is not going to background
+            //Is just in transition to the answer screen,
+            //so the peer can continue available
+            return
+        }
+        if self.isStarted {
+            localStatus = .NoAvailable
+            propagateLocalTxtRecord()
+        }
+    }
+    
+    func suspendBonjour() {
+        if self.isStarted {
+            for pal in self.nearbyPals {
+                self.removePal(pal)
+            }
+            self.disableService()
+            self.disableBrowser()
+            
+        }
+    }
+    
+    func resumeBonjour() {
+        if self.isStarted {
+            self.setupService()
+        }
+    }
+    
+    func registerForBackgroundNotifications() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationWillResignActive,
+                                               object: nil,
+                                               queue: nil) { [unowned self] (notification) in
+                                                self.prepareForBonjourSuspension()
+        }
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidEnterBackground,
+                                               object: nil,
+                                               queue: nil) { [unowned self] (notification) in
+                                                self.suspendBonjour()
+        }
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidBecomeActive,
+                                               object: nil,
+                                               queue: nil) { [unowned self] (notification) in
+                                                self.resumeBonjour()
+        }
+    }
 }
 
 // MARK: - Service initialization
 
 extension CallManager {
     
-    func setupService() {
-        localService = NetService(domain: domain,
-                                  type: serviceType,
-                                  baseName: baseServiceName,
-                                  uuid: localIdentifier,
-                                  port: 0)
+    fileprivate func setupService() {
+        let localService = NetService(domain: domain,
+                                      type: serviceType,
+                                      baseName: baseServiceName,
+                                      uuid: localIdentifier,
+                                      port: 0)
         localService.includesPeerToPeer = true
         localService.delegate = self
         localService.publish(options: .listenForConnections)
+        self.localService = localService
     }
     
-    func setupBrowser() {
+    fileprivate func setupBrowser() {
         serviceBrowser = NetServiceBrowser()
         serviceBrowser.includesPeerToPeer = true
         serviceBrowser.delegate = self
@@ -91,32 +152,50 @@ extension CallManager {
         
     }
     
+    fileprivate func disableService() {
+        guard let localService = self.localService else {
+            return
+        }
+        localService.stop()
+        localService.delegate = nil
+        self.localService = nil
+    }
+    
+    fileprivate func disableBrowser() {
+        serviceBrowser.stop()
+        serviceBrowser.delegate = nil
+        serviceBrowser = nil
+    }
+    
     public var isStarted: Bool {
-        return localService != nil
+        return _isStarted
     }
     
     public func start() {
+        if self.isStarted {
+            return
+        }
         streamQueue.async {
             self.streamThread = Thread.current
             RunLoop.current.add(Port(), forMode: RunLoopMode.defaultRunLoopMode)// Nasty hack to keep the runloop alive :S
             RunLoop.current.run()
         }
+        _isStarted = true
         setupService()
         
     }
     
     public func stop() {
+        if !self.isStarted {
+            return
+        }
         if let streamThread = streamThread {
             self.perform(#selector(stopRunLoop), on: streamThread, with: nil, waitUntilDone: true)
         }
         streamThread = nil
-        localService.stop()
-        localService.delegate = nil
-        localService = nil
-        
-        serviceBrowser.stop()
-        serviceBrowser.delegate = nil
-        serviceBrowser = nil
+        disableService()
+        disableBrowser()
+        _isStarted = false
     }
 }
 
@@ -460,7 +539,7 @@ extension CallManager {
     
     func propagateLocalTxtRecord() {
         let txtData = createTXTRecord()
-        localService.setTXTRecord(txtData)
+        localService?.setTXTRecord(txtData)
     }
     
     func processTxtUpdate(forService service: NetService, withData data: Data?) {
@@ -518,7 +597,9 @@ extension CallManager {
             return
         }
         nearbyPals.remove(at: index)
-        palDelegate?.callManager(self, didDetectDisconnection: pal)
+        if pal.status != .NoAvailable {
+            palDelegate?.callManager(self, didDetectDisconnection: pal)
+        }
     }
     
     func updatePal(_ pal: NearbyPal, withData data:(username: String, uuid: UUID, status: PalStatus)) {
@@ -534,7 +615,7 @@ extension CallManager {
             } else if pal.status == .NoAvailable {
                 // I keep the pal, but it isn't available for the client until
                 // it's available again.
-                palDelegate?.callManager(self, didDetectDisconnection: pal)
+               // palDelegate?.callManager(self, didDetectDisconnection: pal)
             } else {
                 palDelegate?.callManager(self, didPal: pal, changeStatus: pal.status)
             }
@@ -586,7 +667,6 @@ extension CallManager {
     public func netServiceDidStop(_ sender: NetService) {
         
     }
-    
     
     public func netService(_ sender: NetService, didUpdateTXTRecord data: Data) {
         if sender == localService {

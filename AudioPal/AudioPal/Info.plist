@@ -24,6 +24,7 @@
 	<string>AudioPal needs access to the microphone in order to perform audio calls</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>voip</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
