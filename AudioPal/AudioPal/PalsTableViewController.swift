@@ -136,28 +136,26 @@ extension PalsTableViewController {
         let title: String!
         let message: String!
         if missedCall {
-            title = "Rejected call"
-            message = "A call was rejected due you haven't granted access to the microphone. " +
-            "Please grant access by going to the privacy section of your iPhone."
+            title = NSLocalizedString("Rejected call", comment: "")
+            message = NSLocalizedString("call.rejected.no.mic.access", comment: "")
         } else {
-            title = "Microphone access denied!"
-            message = "AudioPal needs access to the microphone to work.\n" +
-            "Please grant access by going to the privacy section of your iPhone."
+            title = NSLocalizedString("Microphone access denied!", comment: "")
+            message = NSLocalizedString("mic.access.denied", comment: "")
         }
         let alert = UIAlertController(title: title,
                                       message: message,
                                       preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertActionStyle.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     
     func showCannotCallAlert(blockedPal: NearbyPal) {
-        let title = "Blocked user"
-        let message = "You need to unblock \(blockedPal.username!) to perform a call."
+        let title = NSLocalizedString("Blocked user", comment: "")
+        let message = String(format: NSLocalizedString("unblock %@ to call", comment: ""), blockedPal.username!)
         let alert = UIAlertController(title: title,
                                       message: message,
                                       preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertActionStyle.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
 }
@@ -211,10 +209,10 @@ extension PalsTableViewController {
         let color: UIColor!
         
         if pal.isBlocked {
-            title = "Unblock"
+            title =  NSLocalizedString("Unblock", comment: "")
             color = UIColor.untGreen
         } else {
-            title = "Block"
+            title =  NSLocalizedString("Block", comment: "")
             color = UIColor.untReddish
         }
         

@@ -79,7 +79,6 @@ static UInt32 const m_encBitrate = 32000;
     decProperties.outChannels  = 2;
     decProperties.frameSize    = encProperties.frameSize;
     
-    //TODO: Esto tedría que cambiar de acuerdo al encoder del otro lado.
     m_decoder = [[AACELDDecoder alloc] initWith:decProperties magicCookie:m_encoder.magicCookie];
 }
 
@@ -174,7 +173,6 @@ static UInt32 const m_encBitrate = 32000;
                          sizeof(audioFormat));
     
     audioFormat.mChannelsPerFrame = m_outChannels;
-    //TODO: Es necesario volver a setear estos 2 valores?
     audioFormat.mBytesPerFrame    = audioFormat.mChannelsPerFrame * sizeof(SInt32);
     audioFormat.mBytesPerPacket   = audioFormat.mBytesPerFrame;
     AudioUnitSetProperty(m_audioComponent,
@@ -392,7 +390,6 @@ static UInt32 const m_encBitrate = 32000;
 - (void)checkForCleanAudioOutput:(AudioBufferList *)ioData {
     
     if (!audioOutputClean) {
-        NSLog(@"Limpiado");
         ioData->mBuffers[0].mNumberChannels = m_outputBuffer.mNumberChannels;
         memset(ioData->mBuffers[0].mData, 0, ioData->mBuffers[0].mDataByteSize);
         audioOutputClean = YES;

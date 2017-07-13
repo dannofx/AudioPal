@@ -119,7 +119,7 @@ extension CallViewController {
         hangButton.isHidden = false
         muteButton.isHidden = true
         speakerButton.isHidden = true
-        messageLabel.text = "Ringing..."
+        messageLabel.text = NSLocalizedString("Ringing...", comment: "")
     }
     
     func updateToOnCallState() {
@@ -147,12 +147,12 @@ extension CallViewController {
         hangButton.isHidden = true
         muteButton.isHidden = true
         speakerButton.isHidden = true
-        messageLabel.text = "Connecting..."
+        messageLabel.text = NSLocalizedString("Connecting...", comment: "")
     }
     
     func updateCallTime() {
         let timeString = stringInterval(forDate: startCallDate)
-        messageLabel.text = "AudioPal Audio \(timeString)"
+        messageLabel.text = String(format: NSLocalizedString("AudioPal Audio %@", comment: ""), timeString)
     }
     
     func stringInterval(forDate date: Date?) -> String {

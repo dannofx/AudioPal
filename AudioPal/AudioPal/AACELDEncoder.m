@@ -80,7 +80,6 @@
     
     if (!audioConverter)
     {
-        //TODO: Que hacer aquí?
         return;
     }
     

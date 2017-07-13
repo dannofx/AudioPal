@@ -81,7 +81,6 @@
     
     if (!audioConverter)
     {
-        //TODO: No converter
         return ;
     }
     

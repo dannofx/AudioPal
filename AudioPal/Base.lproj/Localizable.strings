@@ -1,0 +1,32 @@
+/* 
+  Localizable.strings
+  AudioPal
+
+  Created by Danno on 7/12/17.
+  Copyright © 2017 Daniel Heredia. All rights reserved.
+*/
+
+"Blocked" = "Blocked";
+"Available" = "Available";
+"Occupied" = "Occupied";
+"Block" = "Block";
+"Unblock" = "Unblock";
+"OK" = "OK";
+"Blocked user" = "Blocked user";
+"Rejected call" = "Rejected call";
+"call.rejected.no.mic.access" = "A call was rejected due you haven't granted access to the microphone. Please grant access by going to the privacy section of your iPhone.";
+"Microphone access denied!" = "Microphone access denied!";
+"mic.access.denied" = "AudioPal needs access to the microphone to work.\nPlease grant access by going to the privacy section of your iPhone.";
+"unblock %@ to call" = "You need to unblock %@ to perform a call.";
+"AudioPal Audio %@" = "AudioPal Audio %@";
+"Connecting..." = "Connecting...";
+"Ringing..." = "Ringing...";
+"Username" = "Username";
+"Blocked users" = "Blocked users";
+"About" = "About";
+"Version %@" = "Version %@";
+"unblock.user %@" = "Are you sure you want to unblock %@";
+"Unblock user" = "Unblock user";
+"Not" = "Not";
+"Yes" = "Yes";
+

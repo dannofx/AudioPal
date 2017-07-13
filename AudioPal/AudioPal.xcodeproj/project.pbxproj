@@ -40,6 +40,7 @@
 		51C8EAE51EDFDA9B0029271C /* AACELDDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EADF1EDFDA9B0029271C /* AACELDDecoder.m */; };
 		51C8EAE61EDFDA9B0029271C /* AACELDEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */; };
 		51C8EAE71EDFDA9B0029271C /* EncodingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51C8EAE31EDFDA9B0029271C /* EncodingUtils.cpp */; };
+		51CCF2A21F17189600FFDAC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 51CCF2A41F17189600FFDAC5 /* Localizable.strings */; };
 		51DAD7411F0DED66009FD695 /* BlockedPalTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DAD7401F0DED66009FD695 /* BlockedPalTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -96,6 +97,7 @@
 		51C8EAE11EDFDA9B0029271C /* AACELDEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AACELDEncoder.m; sourceTree = "<group>"; };
 		51C8EAE21EDFDA9B0029271C /* EncodingUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EncodingUtils.hpp; sourceTree = "<group>"; };
 		51C8EAE31EDFDA9B0029271C /* EncodingUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EncodingUtils.cpp; sourceTree = "<group>"; };
+		51CCF2A31F17189600FFDAC5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		51DAD7401F0DED66009FD695 /* BlockedPalTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedPalTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -219,6 +221,7 @@
 				5175FCC41ECE9F1200A28166 /* Info.plist */,
 				5175FCDA1ECEA3D900A28166 /* Constants.swift */,
 				5131CFED1EE905C6006E99DC /* CallInteractionProvider.swift */,
+				51CCF2A41F17189600FFDAC5 /* Localizable.strings */,
 			);
 			path = AudioPal;
 			sourceTree = "<group>";
@@ -339,6 +342,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5175FCC31ECE9F1200A28166 /* LaunchScreen.storyboard in Resources */,
+				51CCF2A21F17189600FFDAC5 /* Localizable.strings in Resources */,
 				5175FCC01ECE9F1200A28166 /* Assets.xcassets in Resources */,
 				513ABA3B1F0CA61200FE9FD0 /* SettingsSectionView.xib in Resources */,
 				519B8B4B1F02150F0048FB82 /* EmptyTable.xib in Resources */,
@@ -423,6 +427,15 @@
 				5175FCC21ECE9F1200A28166 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		51CCF2A41F17189600FFDAC5 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				51CCF2A31F17189600FFDAC5 /* Base */,
+			);
+			name = Localizable.strings;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

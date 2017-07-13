@@ -174,23 +174,6 @@ extension CallInteractionProvider: CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
-//        // Retrieve the SpeakerboxCall instance corresponding to the action's call UUID
-//        guard let call = callManager.callWithUUID(uuid: action.callUUID) else {
-//            action.fail()
-//            return
-//        }
-//        
-//        // Update the SpeakerboxCall's underlying hold state.
-//        call.isOnHold = action.isOnHold
-//        
-//        // Stop or start audio in response to holding or unholding the call.
-//        if call.isOnHold {
-//            stopAudio()
-//        } else {
-//            startAudio()
-//        }
-//        
-//        // Signal to the system that the action has been successfully performed.
         action.fulfill()
     }
     
@@ -206,10 +189,6 @@ extension CallInteractionProvider: CXProviderDelegate {
     func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
         print("Received \(#function)")
         
-        /*
-         Restart any non-call related audio now that the app's audio session has been
-         de-activated after having its priority restored to normal.
-         */
     }
     
 }

@@ -31,11 +31,11 @@ enum TableSection: Int {
     var title: String {
         switch self {
         case .username:
-            return "Username"
+            return NSLocalizedString("Username", comment: "")
         case .blockedUsers:
-            return "Blocked users"
+            return NSLocalizedString("Blocked users", comment: "")
         case .about:
-            return "Username"
+            return NSLocalizedString("About", comment: "")
         }
     }
     
@@ -125,7 +125,7 @@ class SettingsTableViewController: UITableViewController, UITextFieldDelegate {
             return
         }
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            versionLabel.text = "Version \(version)"
+            versionLabel.text = String(format: NSLocalizedString("Version %@", comment: ""), version)
         }
         
     }
@@ -258,11 +258,11 @@ extension SettingsTableViewController: BlockedPalTableViewCellDelegate {
         let indexPath = IndexPath.init(row: unblockIndex, section: 0)
         let blockedUser = fetchedResultController.object(at: indexPath)
         
-        let alertController = UIAlertController(title: "Unblock user",
-                                                message: "Are you sure you want to unblock \(blockedUser.username ?? "(unknown)")",
+        let alertController = UIAlertController(title: NSLocalizedString("Unblock user", comment: ""),
+                                                message: String(format: NSLocalizedString("unblock.user %@", comment: ""), blockedUser.username ?? "(unknown)"),
                                          preferredStyle: UIAlertControllerStyle.alert)
-        alertController.addAction(UIAlertAction(title: "Not", style: UIAlertActionStyle.default))
-        alertController.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.default) { action in
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Not", comment: ""), style: UIAlertActionStyle.default))
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Yes", comment: ""), style: UIAlertActionStyle.default) { action in
             blockedUser.managedObjectContext?.delete(blockedUser)
             self.dataController.saveContext()
         })

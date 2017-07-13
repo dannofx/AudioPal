@@ -27,17 +27,17 @@ class PalTableViewCell: UITableViewCell {
         self.usernameLabel.text = pal.username
         
         if pal.isBlocked {
-            self.stateLabel.text = "Blocked"
+            self.stateLabel.text = NSLocalizedString("Blocked", comment: "")
             self.stateImage.image = UIImage(named: "userBlocked")
             return
         }
         
         switch pal.status {
         case .Available:
-            self.stateLabel.text = "Available"
+            self.stateLabel.text =  NSLocalizedString("Available", comment: "")
             self.stateImage.image = UIImage(named: "userAvailable")
         case .Occupied:
-            self.stateLabel.text = "Occupied"
+            self.stateLabel.text =  NSLocalizedString("Occupied", comment: "")
             self.stateImage.image = UIImage(named: "userOccupied")
         default:
             print("The pal state can't be represented in cell")

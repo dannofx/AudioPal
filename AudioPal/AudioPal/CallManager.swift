@@ -517,7 +517,6 @@ extension CallManager {
         guard let index = nearbyPals.index(of: pal) else {
             return
         }
-        //TODO: Add events like close connections if opened
         nearbyPals.remove(at: index)
         palDelegate?.callManager(self, didDetectDisconnection: pal)
     }
