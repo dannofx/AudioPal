@@ -205,7 +205,7 @@ extension SettingsTableViewController {
         if let blockedPalCell = cell as? BlockedPalTableViewCell {
             let modIndexPath = IndexPath.init(row: indexPath.row, section: 0)
             let blockedUser = fetchedResultController.object(at: modIndexPath)
-            blockedPalCell.configure(withBlockedUser: blockedUser, atIndex: indexPath.row)
+            blockedPalCell.configure(withBlockedUser: blockedUser)
             blockedPalCell.delegate = self
         } else if let label = cell.viewWithTag(versionTag) as? UILabel {
             versionLabel = label
@@ -254,10 +254,8 @@ extension SettingsTableViewController {
 // MARK: - Blocked Pal Cell Delegate 
 
 extension SettingsTableViewController: BlockedPalTableViewCellDelegate {
-    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblockAt unblockIndex: Int) {
-        let indexPath = IndexPath.init(row: unblockIndex, section: 0)
-        let blockedUser = fetchedResultController.object(at: indexPath)
-        
+    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblock objectID: NSManagedObjectID) {
+        let blockedUser = dataController.persistentContainer.viewContext.object(with: objectID) as! BlockedUser
         let alertController = UIAlertController(title: NSLocalizedString("Unblock user", comment: ""),
                                                 message: String(format: NSLocalizedString("unblock.user %@", comment: ""), blockedUser.username ?? "(unknown)"),
                                          preferredStyle: UIAlertControllerStyle.alert)
@@ -293,7 +291,7 @@ extension SettingsTableViewController: NSFetchedResultsControllerDelegate {
             case .update:
                 let cell =  tableView.cellForRow(at: tableIndexPath) as! BlockedPalTableViewCell
                 let blockedUser = fetchedResultController.object(at: indexPath!)
-                cell.configure(withBlockedUser: blockedUser, atIndex: tableIndexPath.row)
+                cell.configure(withBlockedUser: blockedUser)
             case .move:
                 tableView.deleteRows(at: [tableIndexPath], with: .automatic)
                 tableView.insertRows(at: [tableIndexPath], with: .automatic)

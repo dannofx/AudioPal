@@ -7,15 +7,16 @@
 //
 
 import UIKit
+import CoreData
 
 protocol BlockedPalTableViewCellDelegate: class {
-    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblockAt unblockIndex: Int)
+    func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblock objectID: NSManagedObjectID)
 }
 
 class BlockedPalTableViewCell: UITableViewCell {
     
     @IBOutlet weak var usernameLabel: UILabel!
-    private var index: Int!
+    private var objectID: NSManagedObjectID!
     weak var delegate: BlockedPalTableViewCellDelegate?
 
     override func awakeFromNib() {
@@ -26,13 +27,17 @@ class BlockedPalTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    func configure(withBlockedUser blockedUser: BlockedUser, atIndex: Int) {
+    func configure(withBlockedUser blockedUser: BlockedUser) {
         usernameLabel.text = blockedUser.username
-        index = atIndex
+        objectID = blockedUser.objectID
     }
     
     @IBAction func unblockUser(sender: Any) {
-        self.delegate?.blockedPalCell(self, didUnblockAt: index)
+        self.delegate?.blockedPalCell(self, didUnblock: objectID)
+    }
+    
+    deinit {
+        objectID = nil
     }
 
 }
