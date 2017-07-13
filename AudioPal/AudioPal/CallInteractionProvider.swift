@@ -31,6 +31,8 @@ class CallInteractionProvider: NSObject {
         providerConfiguration.supportsVideo = false
         providerConfiguration.maximumCallsPerCallGroup = 1
         providerConfiguration.supportedHandleTypes = [.generic]
+        let icon = #imageLiteral(resourceName: "appiconsmall")
+        providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation(icon)
         
         return providerConfiguration
     }
@@ -74,6 +76,9 @@ extension CallInteractionProvider {
         let update = CXCallUpdate()
         update.remoteHandle = CXHandle(type: .generic, value: call.pal.username!)
         update.hasVideo = false
+        update.supportsUngrouping = false
+        update.supportsHolding = false
+        update.supportsGrouping = false
         calls.append(call)
         provider.reportNewIncomingCall(with: call.uuid, update: update) { error in
             if error != nil {
