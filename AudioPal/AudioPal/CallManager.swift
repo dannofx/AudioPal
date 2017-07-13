@@ -40,6 +40,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
     var _isStarted: Bool!
     let streamQueue: DispatchQueue
     var streamThread: Thread?
+    var showingIncomingCallUI: Bool!
     let interactionProvider: CallInteractionProvider
     weak var palDelegate: PalConnectionDelegate?
     weak var delegate: CallManagerDelegate?
@@ -64,6 +65,7 @@ class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, Stre
         nearbyPals = []
         streamQueue = DispatchQueue(label: "audiopal.callqueue", attributes: .concurrent)
         _isStarted = false
+        showingIncomingCallUI = false
         super.init()
         interactionProvider.callManager = self
         registerForBackgroundNotifications()
@@ -84,6 +86,7 @@ private extension CallManager {
             //In this case the application is not going to background
             //Is just in transition to the answer screen,
             //so the peer can continue available
+            showingIncomingCallUI = true
             return
         }
         if self.isStarted {
@@ -104,6 +107,10 @@ private extension CallManager {
     }
     
     func resumeBonjour() {
+        if showingIncomingCallUI {
+            showingIncomingCallUI = false
+            return
+        }
         if self.isStarted {
             self.setupService()
         }

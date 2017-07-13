@@ -30,6 +30,7 @@ class CallInteractionProvider: NSObject {
         let providerConfiguration = CXProviderConfiguration(localizedName: "AudioPal")
         providerConfiguration.supportsVideo = false
         providerConfiguration.maximumCallsPerCallGroup = 1
+        providerConfiguration.maximumCallGroups = 1
         providerConfiguration.supportedHandleTypes = [.generic]
         let icon = #imageLiteral(resourceName: "appiconsmall")
         providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation(icon)
