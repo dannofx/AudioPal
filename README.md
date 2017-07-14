@@ -12,4 +12,4 @@ The project is non-profit, it was developed with the motivation to learn and pra
 
 ## Screenshots
 
-<img src="img/scr1.png" alt='Screen 1' width="250" hspace="10" vspace="10"><img src="img/scr2.png" alt='Screen 2' width="250" hspace="10" vspace="10"><img src="img/scr3.png" alt='Screen 3' width="250" hspace="10" vspace="10"><img src="img/scr4.png" alt='Screen 4' width="250" hspace="10" vspace="10">
+<img src="img/scr1.png" alt='Screen 1' width="250" hspace="10" vspace="10" border=1><img src="img/scr2.png" alt='Screen 2' width="250" hspace="10" vspace="10" border=1 ><img src="img/scr3.png" alt='Screen 3' width="250" hspace="10" vspace="10" border=1><img src="img/scr4.png" alt='Screen 4' width="250" hspace="10" vspace="10" border=1>
