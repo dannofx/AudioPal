@@ -8,7 +8,7 @@ Since the Bonjour service is published, resolved and monitored over peer-to-peer
 
 The only requirement is to have iOS 10.0 or superior installed.  
 
-The project is non-profit, it was developed with the motivation to learn and practive more iOS development, so feel free to contribute in any way.
+The project is non-profit, it was developed with the motivation to learn and practice more about iOS development, so feel free to contribute in any way.
 
 ## Screenshots
 
