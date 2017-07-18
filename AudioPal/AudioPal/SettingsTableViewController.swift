@@ -279,9 +279,9 @@ extension SettingsTableViewController: NSFetchedResultsControllerDelegate {
 
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         let tableIndexPath = IndexPath.init(row: indexPath!.row, section: TableSection.blockedUsers.rawValue)
+        let tableNewIndexPath = IndexPath.init(row: newIndexPath!.row, section: TableSection.blockedUsers.rawValue)
         switch type {
             case .insert:
-                let tableNewIndexPath = IndexPath.init(row: newIndexPath!.row, section: TableSection.blockedUsers.rawValue)
                 tableView.insertRows(at: [tableNewIndexPath], with: .automatic)
             case .delete:
                 tableView.deleteRows(at: [tableIndexPath], with: .automatic)
@@ -294,7 +294,7 @@ extension SettingsTableViewController: NSFetchedResultsControllerDelegate {
                 cell.configure(withBlockedUser: blockedUser)
             case .move:
                 tableView.deleteRows(at: [tableIndexPath], with: .automatic)
-                tableView.insertRows(at: [tableIndexPath], with: .automatic)
+                tableView.insertRows(at: [tableNewIndexPath], with: .automatic)
         }
     }
     
