@@ -150,7 +150,7 @@ extension CallViewController {
         messageLabel.text = NSLocalizedString("Connecting...", comment: "")
     }
     
-    func updateCallTime() {
+    @objc func updateCallTime() {
         let timeString = stringInterval(forDate: startCallDate)
         messageLabel.text = String(format: NSLocalizedString("AudioPal Audio %@", comment: ""), timeString)
     }

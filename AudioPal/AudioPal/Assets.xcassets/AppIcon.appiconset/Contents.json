@@ -100,6 +100,12 @@
       "scale" : "2x"
     },
     {
+      "size" : "1024x1024",
+      "idiom" : "ios-marketing",
+      "filename" : "1024x1024-1.png",
+      "scale" : "1x"
+    },
+    {
       "size" : "60x60",
       "idiom" : "car",
       "filename" : "120x120-2.png",
