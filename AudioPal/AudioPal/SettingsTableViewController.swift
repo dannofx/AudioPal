@@ -172,7 +172,7 @@ extension SettingsTableViewController {
         }
         username = newUsername
         UserDefaults.standard.setValue(username, forKey: StoredValues.username)
-        let userInfo: [AnyHashable : Any] = [StoredValues.username: username]
+        let userInfo: [AnyHashable : Any] = [StoredValues.username: username!]
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: NotificationNames.userReady),
                                         object: self,
                                         userInfo: userInfo)
