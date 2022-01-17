@@ -13,7 +13,7 @@ let serviceType = "_apal._tcp."
 let baseServiceName = "audiopal"
 let maxBufferSize = 2048
 
-protocol PalConnectionDelegate: class {
+protocol PalConnectionDelegate: AnyObject {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectCallError error: Error, withPal pal: NearbyPal)
@@ -22,7 +22,7 @@ protocol PalConnectionDelegate: class {
     func callManager(_ callManager: CallManager, didStartCallWithPal pal: NearbyPal)
 }
 
-protocol CallManagerDelegate: class {
+protocol CallManagerDelegate: AnyObject {
     func callManager(_ callManager: CallManager, didStartCall call: Call)
     func callManager(_ callManager: CallManager, didEstablishCall call: Call)
     func callManager(_ callManager: CallManager, didEndCall call: Call, error: Error?)

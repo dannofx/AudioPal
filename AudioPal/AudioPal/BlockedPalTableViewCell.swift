@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-protocol BlockedPalTableViewCellDelegate: class {
+protocol BlockedPalTableViewCellDelegate: AnyObject {
     func blockedPalCell(_ cell: BlockedPalTableViewCell, didUnblock objectID: NSManagedObjectID)
 }
 

@@ -295,6 +295,8 @@ extension SettingsTableViewController: NSFetchedResultsControllerDelegate {
             case .move:
                 tableView.deleteRows(at: [tableIndexPath], with: .automatic)
                 tableView.insertRows(at: [tableNewIndexPath], with: .automatic)
+            default:
+                break
         }
     }
     
