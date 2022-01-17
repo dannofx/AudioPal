@@ -55,6 +55,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3DC3245C27958CB10093A7E7 /* DEVELOPMENT_TEAM.template.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = DEVELOPMENT_TEAM.template.xcconfig; sourceTree = "<group>"; };
+		3DC3245D27958CB10093A7E7 /* DEVELOPMENT_TEAM.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = DEVELOPMENT_TEAM.xcconfig; sourceTree = "<group>"; };
+		3DC3245E27958CB10093A7E7 /* Shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		511553B41F148550007DC35B /* BlockedUser+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BlockedUser+CoreDataClass.swift"; sourceTree = "<group>"; };
 		511553B51F148550007DC35B /* BlockedUser+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BlockedUser+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		511553B91F149546007DC35B /* DataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
@@ -120,6 +123,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3DC3245B27958CB10093A7E7 /* Xcode-config */ = {
+			isa = PBXGroup;
+			children = (
+				3DC3245C27958CB10093A7E7 /* DEVELOPMENT_TEAM.template.xcconfig */,
+				3DC3245D27958CB10093A7E7 /* DEVELOPMENT_TEAM.xcconfig */,
+				3DC3245E27958CB10093A7E7 /* Shared.xcconfig */,
+			);
+			path = "Xcode-config";
+			sourceTree = "<group>";
+		};
 		511553B81F1486BD007DC35B /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
@@ -188,6 +201,7 @@
 		5175FCAC1ECE9F1200A28166 = {
 			isa = PBXGroup;
 			children = (
+				3DC3245B27958CB10093A7E7 /* Xcode-config */,
 				5175FCB71ECE9F1200A28166 /* AudioPal */,
 				5175FCCC1ECE9F1200A28166 /* AudioPalTests */,
 				5175FCB61ECE9F1200A28166 /* Products */,
@@ -296,11 +310,9 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0920;
-				ORGANIZATIONNAME = "Daniel Heredia";
 				TargetAttributes = {
 					5175FCB41ECE9F1200A28166 = {
 						CreatedOnToolsVersion = 8.3.2;
-						DevelopmentTeam = FMC5MLL736;
 						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -311,7 +323,6 @@
 					};
 					5175FCC81ECE9F1200A28166 = {
 						CreatedOnToolsVersion = 8.3.2;
-						DevelopmentTeam = FMC5MLL736;
 						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 5175FCB41ECE9F1200A28166;
@@ -323,6 +334,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -444,6 +456,7 @@
 /* Begin XCBuildConfiguration section */
 		5175FCD01ECE9F1200A28166 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3DC3245E27958CB10093A7E7 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -501,6 +514,7 @@
 		};
 		5175FCD11ECE9F1200A28166 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3DC3245E27958CB10093A7E7 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -554,7 +568,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPal/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -573,7 +586,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPal/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -591,7 +603,6 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPalTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mistercyb.audiopal.AudioPalTests;
@@ -607,7 +618,6 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FMC5MLL736;
 				INFOPLIST_FILE = AudioPalTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mistercyb.audiopal.AudioPalTests;
