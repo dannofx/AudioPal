@@ -33,7 +33,7 @@ class CallInteractionProvider: NSObject {
         providerConfiguration.maximumCallGroups = 1
         providerConfiguration.supportedHandleTypes = [.generic]
         let icon = #imageLiteral(resourceName: "appiconsmall")
-        providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation(icon)
+        providerConfiguration.iconTemplateImageData = icon.pngData()
         
         return providerConfiguration
     }
@@ -75,7 +75,12 @@ extension CallInteractionProvider {
     
     func reportIncomingCall(call: Call, completion: ((NSError?) -> Void)? = nil) {
         let update = CXCallUpdate()
-        update.remoteHandle = CXHandle(type: .generic, value: call.pal.username!)
+        guard let username = call.pal.username else {
+            self.endCall(call)
+            completion?(nil)
+            return
+        }
+        update.remoteHandle = CXHandle(type: .generic, value: username)
         update.hasVideo = false
         update.supportsUngrouping = false
         update.supportsHolding = false

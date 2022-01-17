@@ -35,7 +35,7 @@ extension Array where Element : Equatable {
     }
     
     mutating func sortedUpdate(item: Element, isAscendant: (Element, Element) -> Bool) -> (old: Index, new: Index)? {
-        guard let oldIndex = self.index(of: item) else {
+        guard let oldIndex = self.firstIndex(of: item) else {
             return nil
         }
         self.remove(at: oldIndex)

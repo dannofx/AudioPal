@@ -68,3 +68,6 @@ fastlane/test_output
 
 # MacOS files
 *.DS_Store
+
+# User-specific xcconfig files
+AudioPal/Xcode-config/DEVELOPMENT_TEAM.xcconfig

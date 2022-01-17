@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-protocol DataControllerDelegate: class {
+protocol DataControllerDelegate: AnyObject {
     func dataController(_ dataController: DataController, didUnblockUserWithId uuid: UUID)
 }
 

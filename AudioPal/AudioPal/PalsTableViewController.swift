@@ -18,7 +18,7 @@ class PalsTableViewController: UITableViewController, PalConnectionDelegate {
     
     fileprivate var dataController: DataController
     
-    override init(style: UITableViewStyle) {
+    override init(style: UITableView.Style) {
         callManager = CallManager()
         connectedPals = []
         dataController = DataController()
@@ -144,8 +144,8 @@ extension PalsTableViewController {
         }
         let alert = UIAlertController(title: title,
                                       message: message,
-                                      preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertActionStyle.default, handler: nil))
+                                      preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertAction.Style.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -154,8 +154,8 @@ extension PalsTableViewController {
         let message = String(format: NSLocalizedString("unblock %@ to call", comment: ""), blockedPal.username!)
         let alert = UIAlertController(title: title,
                                       message: message,
-                                      preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertActionStyle.default, handler: nil))
+                                      preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: UIAlertAction.Style.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
 }
@@ -179,7 +179,7 @@ extension PalsTableViewController {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
             tableView.deleteRows(at: [indexPath], with: .fade)
@@ -216,10 +216,10 @@ extension PalsTableViewController {
             color = UIColor.untReddish
         }
         
-        let blockAction = UITableViewRowAction(style: UITableViewRowActionStyle.default, title: title){ (_, _) in
+        let blockAction = UITableViewRowAction(style: UITableViewRowAction.Style.default, title: title){ (_, _) in
             pal.isBlocked = !pal.isBlocked
             self.tableView.beginUpdates()
-            tableView.reloadRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+            tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
             self.dataController.updateBlockStatus(pal: pal)
         }
@@ -239,7 +239,7 @@ extension PalsTableViewController {
         let index = connectedPals.sortedInsert(item: pal, isAscendant: NearbyPal.isAscendant)
         let indexPath = IndexPath.init(row: index, section: 0)
         checkForNoPalsView()
-        tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
         tableView.endUpdates()
         
         dataController.checkIfBlocked(pal: pal) { (pal, blocked) in
@@ -251,7 +251,7 @@ extension PalsTableViewController {
     }
     
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal) {
-        guard let index = connectedPals.index(of: pal) else {
+        guard let index = connectedPals.firstIndex(of: pal) else {
             return
         }
         print("Deleting pal in main list")
@@ -259,7 +259,7 @@ extension PalsTableViewController {
         let indexPath = IndexPath.init(row: index, section: 0)
         connectedPals.remove(at: index)
         checkForNoPalsView()
-        tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
         tableView.endUpdates()
     }
     
@@ -280,7 +280,7 @@ extension PalsTableViewController {
     }
     
     func updateCell(forPal pal: NearbyPal) {
-        guard connectedPals.index(of: pal) != nil else {
+        guard connectedPals.firstIndex(of: pal) != nil else {
             return
         }
         print("Updating pal in main list")
@@ -293,7 +293,7 @@ extension PalsTableViewController {
         tableView.moveRow(at: oldIndexPath, to: newIndexPath)
         tableView.endUpdates()
         tableView.beginUpdates()
-        tableView.reloadRows(at: [newIndexPath], with: UITableViewRowAnimation.automatic)
+        tableView.reloadRows(at: [newIndexPath], with: UITableView.RowAnimation.automatic)
         tableView.endUpdates()
     }
 }

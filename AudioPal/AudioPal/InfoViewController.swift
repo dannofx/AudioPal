@@ -14,12 +14,20 @@ class InfoViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        urlButton.setTitle(repoURL, for: UIControlState.normal)
+        urlButton.setTitle(repoURL, for: UIControl.State.normal)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return false
     }
     
     @IBAction func openURL(_ sender: Any) {

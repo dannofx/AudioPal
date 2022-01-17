@@ -13,7 +13,7 @@ let serviceType = "_apal._tcp."
 let baseServiceName = "audiopal"
 let maxBufferSize = 2048
 
-protocol PalConnectionDelegate: class {
+protocol PalConnectionDelegate: AnyObject {
     func callManager(_ callManager: CallManager, didDetectNearbyPal pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectDisconnection pal: NearbyPal)
     func callManager(_ callManager: CallManager, didDetectCallError error: Error, withPal pal: NearbyPal)
@@ -22,7 +22,7 @@ protocol PalConnectionDelegate: class {
     func callManager(_ callManager: CallManager, didStartCallWithPal pal: NearbyPal)
 }
 
-protocol CallManagerDelegate: class {
+protocol CallManagerDelegate: AnyObject {
     func callManager(_ callManager: CallManager, didStartCall call: Call)
     func callManager(_ callManager: CallManager, didEstablishCall call: Call)
     func callManager(_ callManager: CallManager, didEndCall call: Call, error: Error?)
@@ -32,7 +32,7 @@ protocol CallManagerDelegate: class {
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate, ADProcessorDelegate {
     var localService: NetService?
-    var serviceBrowser: NetServiceBrowser!
+    var serviceBrowser: NetServiceBrowser?
     var localStatus: PalStatus = .NoAvailable
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
@@ -117,17 +117,17 @@ private extension CallManager {
     }
     
     func registerForBackgroundNotifications() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationWillResignActive,
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.prepareForBonjourSuspension()
         }
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidEnterBackground,
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.suspendBonjour()
         }
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidBecomeActive,
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.resumeBonjour()
@@ -153,6 +153,9 @@ extension CallManager {
     
     fileprivate func setupBrowser() {
         serviceBrowser = NetServiceBrowser()
+        guard let serviceBrowser = serviceBrowser else {
+            return
+        }
         serviceBrowser.includesPeerToPeer = true
         serviceBrowser.delegate = self
         serviceBrowser.searchForServices(ofType: serviceType, inDomain: domain)
@@ -169,9 +172,12 @@ extension CallManager {
     }
     
     fileprivate func disableBrowser() {
+        guard let serviceBrowser = serviceBrowser else {
+            return
+        }
         serviceBrowser.stop()
         serviceBrowser.delegate = nil
-        serviceBrowser = nil
+        self.serviceBrowser = nil
     }
     
     public var isStarted: Bool {
@@ -184,7 +190,7 @@ extension CallManager {
         }
         streamQueue.async {
             self.streamThread = Thread.current
-            RunLoop.current.add(Port(), forMode: RunLoopMode.defaultRunLoopMode)// Nasty hack to keep the runloop alive :S
+            RunLoop.current.add(Port(), forMode: RunLoop.Mode.default)// Nasty hack to keep the runloop alive :S
             RunLoop.current.run()
         }
         _isStarted = true
@@ -383,7 +389,7 @@ extension CallManager {
         guard let data = Call.readInputStream(inputStream) else {
             return
         }
-        guard let foundIndex = acceptedStreams.index(where: { $0.input == inputStream }) else {
+        guard let foundIndex = acceptedStreams.firstIndex(where: { $0.input == inputStream }) else {
             inputStream.close()
             return
         }
@@ -461,14 +467,14 @@ private extension CallManager {
     
     @objc func openStream(_ stream: Stream) {
         stream.delegate = self
-        stream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        stream.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
         stream.open()
     }
     
     @objc func closeStream(_ stream: Stream) {
         stream.delegate = nil
         stream.close()
-        stream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        stream.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
     }
     
     @objc func writeToCurrentCall(_ buffer: Data) {
@@ -498,10 +504,8 @@ extension CallManager {
         let uuid_data = localIdentifier.data
         
         // Get status data
-        var statusValue = localStatus.rawValue
-        let status_data = withUnsafePointer(to: &statusValue) { (unsafe_status) -> Data in
-            Data(bytes: unsafe_status, count: MemoryLayout.size(ofValue: unsafe_status))
-        }
+        let statusValue = localStatus.rawValue
+        let status_data = Data(withUnsafeBytes(of: statusValue.littleEndian, Array.init))
         
         // Make a dictionary compatible with txt records format
         let packet: [String : Data] = [ PacketKeys.username: username_data,
@@ -535,7 +539,12 @@ extension CallManager {
         let uuid = UUID(data: uuid_data)!
         
         //Decode status
-        let status_raw: Int = status_data.withUnsafeBytes { $0.pointee }
+        // NOTE: If we ever run this code on non-64-bit platforms, we need to limit/pad the raw data to MemoryLayout<Int>.size bytes.
+        assert(status_data.count == MemoryLayout<Int>.size)
+        var status_raw_data = status_data
+        let rawPointer = withUnsafeBytes(of: &status_raw_data, { $0.baseAddress! })
+        let rawInt = rawPointer.load(as: Int.self)
+        let status_raw = Int(littleEndian: rawInt)
         let status = PalStatus(rawValue: status_raw)!
         
         print("Pal updated TXT record: username \(String(describing: username)) uuid \(uuid.uuidString) status \(status)")
@@ -600,7 +609,7 @@ extension CallManager {
     }
     
     func removePal(_ pal: NearbyPal) {
-        guard let index = nearbyPals.index(of: pal) else {
+        guard let index = nearbyPals.firstIndex(of: pal) else {
             return
         }
         nearbyPals.remove(at: index)
@@ -814,6 +823,6 @@ extension CallManager {
     }
     
     public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
-        print("Error: Problem playing buffer \(error)")
+		print("Error: Problem playing buffer \(String(describing: error))")
     }
 }

@@ -16,7 +16,7 @@ class SetNameViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var logoContainer: UIView!
     @IBOutlet weak var logoConstraint: NSLayoutConstraint!
     var initialLogoValue: CGFloat = 0
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         startButton.isEnabled = false
@@ -74,7 +74,15 @@ class SetNameViewController: UIViewController, UITextFieldDelegate {
         self.view.endEditing(true)
         return false
     }
-
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return false
+    }
+    
 }
 
 // MARK: - Add style
