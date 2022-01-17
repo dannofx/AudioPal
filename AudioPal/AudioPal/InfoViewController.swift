@@ -14,7 +14,7 @@ class InfoViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        urlButton.setTitle(repoURL, for: UIControlState.normal)
+        urlButton.setTitle(repoURL, for: UIControl.State.normal)
     }
 
     override func didReceiveMemoryWarning() {

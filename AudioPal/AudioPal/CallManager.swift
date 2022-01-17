@@ -117,17 +117,17 @@ private extension CallManager {
     }
     
     func registerForBackgroundNotifications() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationWillResignActive,
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.prepareForBonjourSuspension()
         }
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidEnterBackground,
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.suspendBonjour()
         }
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.UIApplicationDidBecomeActive,
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification,
                                                object: nil,
                                                queue: nil) { [unowned self] (notification) in
                                                 self.resumeBonjour()
@@ -184,7 +184,7 @@ extension CallManager {
         }
         streamQueue.async {
             self.streamThread = Thread.current
-            RunLoop.current.add(Port(), forMode: RunLoopMode.defaultRunLoopMode)// Nasty hack to keep the runloop alive :S
+            RunLoop.current.add(Port(), forMode: RunLoop.Mode.default)// Nasty hack to keep the runloop alive :S
             RunLoop.current.run()
         }
         _isStarted = true
@@ -383,7 +383,7 @@ extension CallManager {
         guard let data = Call.readInputStream(inputStream) else {
             return
         }
-        guard let foundIndex = acceptedStreams.index(where: { $0.input == inputStream }) else {
+        guard let foundIndex = acceptedStreams.firstIndex(where: { $0.input == inputStream }) else {
             inputStream.close()
             return
         }
@@ -461,14 +461,14 @@ private extension CallManager {
     
     @objc func openStream(_ stream: Stream) {
         stream.delegate = self
-        stream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        stream.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
         stream.open()
     }
     
     @objc func closeStream(_ stream: Stream) {
         stream.delegate = nil
         stream.close()
-        stream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+        stream.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
     }
     
     @objc func writeToCurrentCall(_ buffer: Data) {
@@ -600,7 +600,7 @@ extension CallManager {
     }
     
     func removePal(_ pal: NearbyPal) {
-        guard let index = nearbyPals.index(of: pal) else {
+        guard let index = nearbyPals.firstIndex(of: pal) else {
             return
         }
         nearbyPals.remove(at: index)

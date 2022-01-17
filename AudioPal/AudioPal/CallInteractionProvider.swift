@@ -33,7 +33,7 @@ class CallInteractionProvider: NSObject {
         providerConfiguration.maximumCallGroups = 1
         providerConfiguration.supportedHandleTypes = [.generic]
         let icon = #imageLiteral(resourceName: "appiconsmall")
-        providerConfiguration.iconTemplateImageData = UIImagePNGRepresentation(icon)
+        providerConfiguration.iconTemplateImageData = icon.pngData()
         
         return providerConfiguration
     }

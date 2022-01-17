@@ -258,9 +258,9 @@ extension SettingsTableViewController: BlockedPalTableViewCellDelegate {
         let blockedUser = dataController.persistentContainer.viewContext.object(with: objectID) as! BlockedUser
         let alertController = UIAlertController(title: NSLocalizedString("Unblock user", comment: ""),
                                                 message: String(format: NSLocalizedString("unblock.user %@", comment: ""), blockedUser.username ?? "(unknown)"),
-                                         preferredStyle: UIAlertControllerStyle.alert)
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Not", comment: ""), style: UIAlertActionStyle.default))
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Yes", comment: ""), style: UIAlertActionStyle.default) { action in
+                                         preferredStyle: UIAlertController.Style.alert)
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Not", comment: ""), style: UIAlertAction.Style.default))
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Yes", comment: ""), style: UIAlertAction.Style.default) { action in
             blockedUser.managedObjectContext?.delete(blockedUser)
             self.dataController.saveContext()
         })
