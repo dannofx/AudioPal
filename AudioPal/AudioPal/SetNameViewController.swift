@@ -16,7 +16,7 @@ class SetNameViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var logoContainer: UIView!
     @IBOutlet weak var logoConstraint: NSLayoutConstraint!
     var initialLogoValue: CGFloat = 0
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         startButton.isEnabled = false
