@@ -230,7 +230,7 @@ extension Call {
     func prepareOutputAudioBuffer(_ buffer: Data) -> (Data) {
         var fullBuffer = Data()
         var size: UInt16 = UInt16(buffer.count)
-        fullBuffer.append(UnsafeBufferPointer(start: &size, count: 1))
+        withUnsafePointer(to: &size) { fullBuffer.append(UnsafeBufferPointer(start: $0, count: 1)) }
         fullBuffer.append(buffer)
         return fullBuffer
     }

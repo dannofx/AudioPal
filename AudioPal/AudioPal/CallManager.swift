@@ -498,10 +498,8 @@ extension CallManager {
         let uuid_data = localIdentifier.data
         
         // Get status data
-        var statusValue = localStatus.rawValue
-        let status_data = withUnsafePointer(to: &statusValue) { (unsafe_status) -> Data in
-            Data(bytes: unsafe_status, count: MemoryLayout.size(ofValue: unsafe_status))
-        }
+        let statusValue = localStatus.rawValue
+        let status_data = Data(withUnsafeBytes(of: statusValue.littleEndian, Array.init))
         
         // Make a dictionary compatible with txt records format
         let packet: [String : Data] = [ PacketKeys.username: username_data,
@@ -535,7 +533,12 @@ extension CallManager {
         let uuid = UUID(data: uuid_data)!
         
         //Decode status
-        let status_raw: Int = status_data.withUnsafeBytes { $0.pointee }
+        // NOTE: If we ever run this code on non-64-bit platforms, we need to limit/pad the raw data to MemoryLayout<Int>.size bytes.
+        assert(status_data.count == MemoryLayout<Int>.size)
+        var status_raw_data = status_data
+        let rawPointer = withUnsafeBytes(of: &status_raw_data, { $0.baseAddress! })
+        let rawInt = rawPointer.load(as: Int.self)
+        let status_raw = Int(littleEndian: rawInt)
         let status = PalStatus(rawValue: status_raw)!
         
         print("Pal updated TXT record: username \(String(describing: username)) uuid \(uuid.uuidString) status \(status)")
