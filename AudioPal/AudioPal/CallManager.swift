@@ -32,7 +32,7 @@ protocol CallManagerDelegate: AnyObject {
 
 class CallManager: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDelegate, ADProcessorDelegate {
     var localService: NetService?
-    var serviceBrowser: NetServiceBrowser!
+    var serviceBrowser: NetServiceBrowser?
     var localStatus: PalStatus = .NoAvailable
     var currentCall: Call?
     var acceptedStreams: [(input: InputStream, output: OutputStream)]!
@@ -153,6 +153,9 @@ extension CallManager {
     
     fileprivate func setupBrowser() {
         serviceBrowser = NetServiceBrowser()
+        guard let serviceBrowser = serviceBrowser else {
+            return
+        }
         serviceBrowser.includesPeerToPeer = true
         serviceBrowser.delegate = self
         serviceBrowser.searchForServices(ofType: serviceType, inDomain: domain)
@@ -169,9 +172,12 @@ extension CallManager {
     }
     
     fileprivate func disableBrowser() {
+        guard let serviceBrowser = serviceBrowser else {
+            return
+        }
         serviceBrowser.stop()
         serviceBrowser.delegate = nil
-        serviceBrowser = nil
+        self.serviceBrowser = nil
     }
     
     public var isStarted: Bool {
