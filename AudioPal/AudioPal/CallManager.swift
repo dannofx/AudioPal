@@ -814,6 +814,6 @@ extension CallManager {
     }
     
     public func processor(_ processor: ADProcessor!, didFailPlayingBuffer buffer: Data!, withError error: Error!) {
-        print("Error: Problem playing buffer \(error)")
+		print("Error: Problem playing buffer \(String(describing: error))")
     }
 }
