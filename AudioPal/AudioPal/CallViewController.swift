@@ -57,6 +57,15 @@ class CallViewController: UIViewController, CallManagerDelegate {
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         return UIInterfaceOrientation.portrait
     }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return false
+    }
+    
 }
 
 // MARK: - UIControls position
